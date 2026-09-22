@@ -1,0 +1,77 @@
+{
+  "manifest_version": 3,
+  "name": "JioHotstar Ad Skipper & Blocker",
+  "version": "1.1.0",
+  "description": "Automatically fast-forwards (16x), auto-mutes, neutralizes VMAP mid-rolls, and skips in-video ads on JioHotstar and JioCinema.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "JioHotstar Ad Skipper"
+  },
+  "permissions": [
+    "storage",
+    "declarativeNetRequest",
+    "webRequest",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.hotstar.com/*",
+    "*://*.jiocinema.com/*",
+    "*://*.jiostar.com/*"
+  ],
+  "background": {
+    "service_worker": "background/service_worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.hotstar.com/*",
+        "*://*.jiocinema.com/*",
+        "*://*.jiostar.com/*"
+      ],
+      "js": ["content/injector.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "*://*.hotstar.com/*",
+        "*://*.jiocinema.com/*",
+        "*://*.jiostar.com/*"
+      ],
+      "js": ["content/detector.js"],
+      "css": ["content/styles.css"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["content/injector.js"],
+      "matches": [
+        "*://*.hotstar.com/*",
+        "*://*.jiocinema.com/*",
+        "*://*.jiostar.com/*"
+      ]
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules/ad_rules.json"
+      }
+    ]
+  }
+}

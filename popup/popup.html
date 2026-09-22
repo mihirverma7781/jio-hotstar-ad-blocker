@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JioHotstar Ad Skipper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo-icon">⚡</div>
+        <div class="brand-text">
+          <h1>JioHotstar Skipper</h1>
+          <span class="version">v1.0.0</span>
+        </div>
+      </div>
+      <div id="statusBadge" class="status-badge active">Active</div>
+    </header>
+
+    <!-- Master Switch Card -->
+    <div class="card master-card">
+      <div class="card-info">
+        <span class="card-title">Ad Skipper & Blocker</span>
+        <span class="card-sub" id="masterStatusText">Accelerating & skipping in-video ads</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggleEnabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-content">
+          <div class="stat-value" id="adsSkippedCount">0</div>
+          <div class="stat-label">Ads Skipped</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-content">
+          <div class="stat-value" id="timeSavedCount">0s</div>
+          <div class="stat-label">Time Saved</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features & Settings -->
+    <div class="section-title">Playback Acceleration</div>
+
+    <div class="card setting-card">
+      <div class="card-info">
+        <span class="card-title">Fast-Forward Speed</span>
+        <span class="card-sub">Speed multiplier during detected ads</span>
+      </div>
+      <div class="speed-selector">
+        <button type="button" class="speed-btn" data-speed="4">4x</button>
+        <button type="button" class="speed-btn" data-speed="8">8x</button>
+        <button type="button" class="speed-btn active" data-speed="16">16x</button>
+      </div>
+    </div>
+
+    <div class="section-title">Automation & Audio</div>
+
+    <div class="settings-list">
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Auto-Mute Ads</span>
+          <span class="setting-desc">Mutes ad audio and restores original volume</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleAutoMute" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Auto-Click "Skip" Buttons</span>
+          <span class="setting-desc">Instantly clicks Skip Ad buttons when clickable</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleAutoSkipButtons" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Instant Seek</span>
+          <span class="setting-desc">Jumps directly past seekable ad clips</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleInstantSeek" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Blur / Dim Ad Video</span>
+          <span class="setting-desc">Hides disruptive visuals with a sleek veil</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleBlurAdVideo" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Skip Intros & Recaps</span>
+          <span class="setting-desc">Auto-clicks "Skip Intro" & "Skip Recap"</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleSkipIntros" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <footer class="footer">
+      <button id="btnResetStats" class="btn-secondary">Reset Stats</button>
+      <a href="https://www.hotstar.com" target="_blank" class="btn-primary">Open Hotstar ↗</a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
