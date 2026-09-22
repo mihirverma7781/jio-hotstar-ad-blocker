@@ -35,9 +35,13 @@ Visit the [Live Project Website](https://mihirverma7781.github.io/jio-hotstar-ad
 * **🔇 Auto-Mute & Volume Restore**: Silences ad audio automatically while active, and cleanly restores your previous listening volume once your show or movie resumes.
 * **⏩ Auto-Click "Skip Ad" Buttons**: Instantly detects and clicks "Skip Ad", "Skip", "Skip Intro", and "Skip Recap" buttons across Hotstar and Prime Video the exact millisecond they appear.
 * **🎯 Instant Seek**: Attempts to seek directly to the end of seekable pre-roll and mid-roll ad segments.
+* **📺 Real Video Super-Resolution Engine**: True GPU-accelerated pixel upscaling (2x for 1080p → 4K, 3x for 720p → 4K, 4x for 480p) powered by WebGPU WGSL & WebGL2 GLSL shaders (Bilateral Denoising, Deblocking, Edge-Directed Reconstruction, and Neural ESPCN/FSRCNN filters).
+* **🏎️ 60 FPS Motion Smoothing**: High-performance GPU optical flow frame interpolation synthesizing intermediate motion-compensated frames to elevate 24 FPS / 30 FPS content to silky smooth 60 FPS in real time.
+* **🌈 Perceptual HDR Tone Expansion**: Dynamic range and highlight expansion tailored for both native and simulated HDR displays with contrast-adaptive sharpening (CAS).
+* **🔀 A/B Split-Screen Comparison**: Instant side-by-side verification (`Alt+Shift+E`) and on-screen HUD telemetry (`Alt+Shift+H`) displaying exact source vs output resolution and framerate.
 * **🚫 In-Webapp Banner & Billboard Purge**: Removes invasive homepage billboard ads, companion promo cards, and subscription nudges for a clean interface.
 * **🕶️ Blur / Dim Screen Veil**: Minimizes disruptive, loud visual ads by applying a subtle blur veil with an unobtrusive *"Skipping Ad ⚡"* HUD indicator.
-* **🛡️ Network Tracking Filter**: Employs Manifest V3 `declarativeNetRequest` rules to suppress external telemetry and ad trackers.
+* **🛡️ DRM-Safe Pipeline**: Transparently respects Widevine EME and HDCP secure pipelines; smoothly falls back to zero-overhead compositor filtering if direct GPU texture access is restricted.
 * **📊 Real-time Dashboard**: Track your total number of ads skipped and total hours/minutes saved directly in the popup interface.
 
 ---
@@ -158,23 +162,29 @@ jio-hotstar-ad-blocker/
 │   └── lab.css               # TV Playback Lab styling
 ├── rules/
 │   └── ad_rules.json         # Declarative Net Request rules
-├── src/                      # TV Mode TypeScript Core Engine
+├── src/                      # TypeScript Core Engines
 │   ├── types/tv_mode.ts      # Data contracts, models & interfaces
-│   ├── core/
-│   │   ├── TVCapabilityEngine.ts       # Display & decoder probing
-│   │   ├── TVHdrEngine.ts              # HDR state & format evaluation
-│   │   ├── TVRepresentationAnalyzer.ts # DASH MPD & HLS M3U8 parsing
-│   │   ├── TVQualitySelector.ts        # TV representation ranking & filtering
-│   │   ├── TVAdaptationController.ts   # TV-style ABR algorithm
-│   │   ├── TVMetrics.ts                # Telemetry & performance metrics
-│   │   ├── TVDiagnostics.ts            # HUD overlay & bottleneck classifier
-│   │   └── TVModeController.ts         # Full 10-step lifecycle coordinator
-│   ├── lab/                            # Lab application and sample manifests
-│   └── index.ts                        # Content script bootstrap entry point
+│   ├── core/                 # TV Mode & ABR Adaptation Controllers
+│   ├── enhancement/          # Video Super-Resolution & 60 FPS Engine
+│   │   ├── shaders/          # WebGPU WGSL & WebGL2 GLSL shader passes
+│   │   ├── FrameAccessManager.ts                # Direct GPU texture vs DRM fallback
+│   │   ├── GpuVideoProcessor.ts                 # Dual-backend FBO ping-pong pipeline
+│   │   ├── VideoUpscalerEngine.ts               # Source-adaptive 2x/3x/4x scaling
+│   │   ├── FrameRateInterpolator.ts            # 60 FPS motion interpolation
+│   │   ├── HDRVisualEnhancer.ts                 # Perceptual HDR tone expansion
+│   │   ├── PresetEngine.ts                      # Cinema, Sports, Anime, Vivid presets
+│   │   ├── EnhancementPerformanceController.ts  # Dynamic tier downshifting & frame skip
+│   │   ├── VideoElementTracker.ts               # Resilient DOM video tracker
+│   │   ├── PrimeVideoEnhancer.ts                # Prime Video source ladder adapter
+│   │   ├── EnhancementPipeline.ts               # Unified frame enhancement pipeline
+│   │   └── VideoEnhancementEngine.ts            # Top-level orchestrator, canvas & HUD
+│   ├── lab/                  # Lab application and sample manifests
+│   └── index.ts              # Content script bootstrap entry point
 ├── dist/                     # Compiled JavaScript bundles (tsup)
 │   ├── tv_mode.js            # Injected content script bundle
-│   └── lab_app.js            # Interactive TV Lab bundle
-├── test/                     # Vitest test suite (17 scenario verifications)
+│   ├── lab_app.js            # Interactive TV Lab bundle
+│   └── prime_bridge.js       # Prime Video DOM adapter bundle
+├── test/                     # Vitest test suite (68 automated test verifications)
 ├── package.json              # TypeScript, tsup, & Vitest toolchain
 ├── tsconfig.json             # TypeScript compiler settings
 └── README.md                 # Project documentation

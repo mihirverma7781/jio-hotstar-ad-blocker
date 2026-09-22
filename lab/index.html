@@ -61,6 +61,60 @@
           </div>
         </div>
 
+        <!-- Video Super-Resolution & 60 FPS Engine Control Panel -->
+        <div class="controls-panel card" style="margin-top: 10px;">
+          <div class="control-group">
+            <label for="labSelUpscalerMode">Super-Resolution Mode:</label>
+            <select id="labSelUpscalerMode">
+              <option value="NEURAL">Neural AI (FSRCNN/ESPCN)</option>
+              <option value="ENHANCED">Enhanced (Edge-Aware Directional)</option>
+              <option value="BASIC">Basic (Bicubic)</option>
+              <option value="OFF">Bypass / Off</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="labSelMotion">Motion Interpolation:</label>
+            <select id="labSelMotion">
+              <option value="SMOOTH_60">Smooth 60 FPS (Active)</option>
+              <option value="CINEMATIC_48">Cinematic 48 FPS</option>
+              <option value="OFF">Native (Off)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="labSelPreset">Profile Preset:</label>
+            <select id="labSelPreset">
+              <option value="CINEMA">Cinema 4K</option>
+              <option value="SPORTS">Live Sports (60 FPS)</option>
+              <option value="VIVID">Vivid Clarity</option>
+              <option value="ANIME">Anime / Animation</option>
+              <option value="HDR_ENHANCE">HDR Tone Enhance</option>
+              <option value="CLEAN">Clean & Denoised</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="labSelScale">Target Scale:</label>
+            <select id="labSelScale">
+              <option value="2">2.0x (1080p → 4K)</option>
+              <option value="3">3.0x (720p → 4K)</option>
+              <option value="4">4.0x (480p/540p → 4K)</option>
+              <option value="DISPLAY_NATIVE">Display Native</option>
+            </select>
+          </div>
+
+          <div class="control-group" style="min-width: 140px;">
+            <label for="labRngSharpness">Sharpness (<span id="labValSharpness">30%</span>):</label>
+            <input type="range" id="labRngSharpness" min="0" max="100" value="30" style="width: 100%;">
+          </div>
+
+          <div class="control-group" style="flex-direction: row; gap: 8px; align-items: flex-end;">
+            <button type="button" id="labBtnSplitScreen" class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px;">🔀 Split Screen (Alt+Shift+E)</button>
+            <button type="button" id="labBtnBypass" class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px;">👁️ Toggle A/B</button>
+          </div>
+        </div>
+
         <!-- Service Bottleneck Analysis Result Box -->
         <div id="labAnalysisResult" class="analysis-container"></div>
 
@@ -114,6 +168,15 @@
             <span class="indicator-live">ABR</span>
           </div>
           <div id="labMetricsBox" class="metrics-grid"></div>
+        </div>
+
+        <!-- Real-Time Super-Resolution & 60 FPS Telemetry -->
+        <div class="card telemetry-card">
+          <div class="card-title-row">
+            <h3>Super-Resolution & 60 FPS</h3>
+            <span class="indicator-live" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.4);">GPU</span>
+          </div>
+          <div id="labEnhancementMetricsBox" class="metrics-grid"></div>
         </div>
 
         <!-- Compliance & Security Assurance Card -->

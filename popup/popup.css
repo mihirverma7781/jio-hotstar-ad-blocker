@@ -458,3 +458,29 @@ input:checked + .slider:before {
   box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
 }
 
+/* Super-Resolution & Enhancement Slider */
+.popup-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 96px;
+  height: 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.popup-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+
