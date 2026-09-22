@@ -22,6 +22,8 @@ export { PrimeRepresentationProbe } from './prime/PrimeRepresentationProbe';
 export { PrimePlayerAdapter } from './prime/PrimePlayerAdapter';
 export { PrimeQualityController } from './prime/PrimeQualityController';
 export { PrimeDebugPanel } from './prime/PrimeDebugPanel';
+export { PrimeTVAbrController } from './prime/PrimeTVAbrController';
+export type { AbrDecision, AbrTier } from './prime/PrimeTVAbrController';
 
 import { TVModeController } from './core/TVModeController';
 import { PrimeQualityController } from './prime/PrimeQualityController';
