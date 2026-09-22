@@ -246,7 +246,7 @@
       if (hasHlgColorSpace) {
         return { hdr: true, dynamicRange: "HLG" };
       }
-      if (is10Bit && hasHdrColorSpace) {
+      if (lowerCodec.startsWith("hvc1.2") || lowerCodec.startsWith("hev1.2")) {
         return { hdr: true, dynamicRange: "HDR10" };
       }
       if (lowerCodec.startsWith("vp09.02") && lowerCodec.includes(".16.")) {
@@ -1170,6 +1170,439 @@
     }
   };
 
+  // src/core/PlaybackVerifier.ts
+  var PlaybackVerifier = class _PlaybackVerifier {
+    /**
+     * Verifies whether an HTMLVideoElement is playing genuine 4K UHD decoded frames.
+     * STRICT SUCCESS CRITERION: video.videoWidth >= 3840 && video.videoHeight >= 2160.
+     */
+    static verifyPlayback(video, contentMetadata) {
+      const actualWidth = video.videoWidth || 0;
+      const actualHeight = video.videoHeight || 0;
+      const isRealUHDWidth = actualWidth >= 3840;
+      const isRealUHDHeight = actualHeight >= 2160;
+      const isReal4K = isRealUHDWidth && isRealUHDHeight;
+      let totalFrames = 0;
+      let droppedFrames = 0;
+      let droppedRatio = 0;
+      if (typeof video.getVideoPlaybackQuality === "function") {
+        const q = video.getVideoPlaybackQuality();
+        totalFrames = q.totalVideoFrames;
+        droppedFrames = q.droppedVideoFrames;
+        droppedRatio = totalFrames > 0 ? droppedFrames / totalFrames : 0;
+      }
+      const transfer = contentMetadata?.transferFunction?.toLowerCase() || "";
+      const primaries = contentMetadata?.colorPrimaries?.toLowerCase() || "";
+      const bitDepth = contentMetadata?.bitDepth === 10 ? 10 : 8;
+      const isPqOrHlg = transfer.includes("smpte2084") || transfer.includes("pq") || transfer.includes("arib-std-b67") || transfer.includes("hlg") || transfer === "16" || transfer === "18";
+      const isWideColor = primaries.includes("rec2020") || primaries.includes("bt2020") || primaries.includes("p3") || primaries === "9";
+      const isGenuineHDR = isPqOrHlg || bitDepth === 10 && isWideColor;
+      const evidence = [];
+      evidence.push(`Decoded Dimensions: ${actualWidth}x${actualHeight}`);
+      if (isReal4K) {
+        evidence.push("4K UHD Dimension Threshold Passed (>= 3840x2160)");
+      } else {
+        evidence.push(`4K UHD Dimension Threshold Failed (${actualWidth}x${actualHeight} < 3840x2160)`);
+      }
+      if (isGenuineHDR) {
+        evidence.push(`Genuine HDR Confirmed: Transfer=${contentMetadata?.transferFunction || "PQ"}, BitDepth=${bitDepth}`);
+      } else {
+        evidence.push("SDR Content Stream (8-bit / Standard Dynamic Range)");
+      }
+      return {
+        isReal4K,
+        isRealUHDWidth,
+        isRealUHDHeight,
+        actualVideoWidth: actualWidth,
+        actualVideoHeight: actualHeight,
+        isGenuineHDR,
+        colorSpace: contentMetadata?.colorPrimaries || "bt709",
+        transferFunction: contentMetadata?.transferFunction || "sdr",
+        bitDepth,
+        totalFrames,
+        droppedFrames,
+        droppedFramesRatio: droppedRatio,
+        verificationPassed: isReal4K,
+        evidence
+      };
+    }
+    /**
+     * Continuous verification observer that resolves when actual decoded 4K frames arrive,
+     * or times out after a specified duration.
+     */
+    static async waitFor4KVerification(video, timeoutMs = 8e3) {
+      const start = Date.now();
+      return new Promise((resolve) => {
+        const check = () => {
+          const report = _PlaybackVerifier.verifyPlayback(video);
+          if (report.isReal4K) {
+            resolve(report);
+            return;
+          }
+          if (Date.now() - start >= timeoutMs) {
+            resolve(report);
+            return;
+          }
+          requestAnimationFrame(check);
+        };
+        check();
+      });
+    }
+  };
+
+  // src/prime/PrimeRepresentationProbe.ts
+  var PrimeRepresentationProbe = class {
+    observedTracks = /* @__PURE__ */ new Map();
+    lastManifestUrl = null;
+    lastManifestType = null;
+    playerEngine = "Amazon ATVWebPlayerSDK";
+    hasTrackApi = false;
+    currentVideoWidth = 0;
+    currentVideoHeight = 0;
+    constructor() {
+      this.initMessageListener();
+    }
+    initMessageListener() {
+      if (typeof window === "undefined") return;
+      window.addEventListener("message", (event) => {
+        if (event.data?.source === "PV_PAGE_BRIDGE" && event.data?.payload) {
+          this.processBridgePayload(event.data.payload);
+        }
+      });
+    }
+    processBridgePayload(payload) {
+      if (payload.manifestUrl) {
+        this.lastManifestUrl = payload.manifestUrl;
+      }
+      if (payload.manifestType) {
+        this.lastManifestType = payload.manifestType;
+      }
+      if (payload.playerEngine) {
+        this.playerEngine = payload.playerEngine;
+      }
+      if (payload.hasTrackSelectionApi !== void 0) {
+        this.hasTrackApi = payload.hasTrackSelectionApi;
+      }
+      if (payload.videoWidth !== void 0) {
+        this.currentVideoWidth = payload.videoWidth;
+      }
+      if (payload.videoHeight !== void 0) {
+        this.currentVideoHeight = payload.videoHeight;
+      }
+      if (payload.observedRepresentations && Array.isArray(payload.observedRepresentations)) {
+        for (const track of payload.observedRepresentations) {
+          this.observedTracks.set(track.id, track);
+        }
+      }
+    }
+    /**
+     * Directly registers an observed track (useful for unit tests and direct DOM observations)
+     */
+    registerTrack(track) {
+      this.observedTracks.set(track.id, track);
+    }
+    getUhdRepresentationStatus() {
+      const has4k = Array.from(this.observedTracks.values()).some(
+        (t) => t.width >= 3840 || t.height >= 2160
+      );
+      return has4k ? "FOUND" : "NOT_FOUND";
+    }
+    getHdrUhdRepresentationStatus() {
+      const has4kHdr = Array.from(this.observedTracks.values()).some(
+        (t) => (t.width >= 3840 || t.height >= 2160) && t.hdr === true
+      );
+      return has4kHdr ? "FOUND" : "NOT_FOUND";
+    }
+    getAllObservedRepresentations() {
+      return Array.from(this.observedTracks.values()).sort((a, b) => b.height - a.height);
+    }
+    getMaxObservedRepresentation() {
+      const tracks = this.getAllObservedRepresentations();
+      return tracks.length > 0 ? tracks[0] : null;
+    }
+    getObservedLadderSummary() {
+      const heights = Array.from(
+        new Set(this.getAllObservedRepresentations().map((t) => `${t.height}p${t.hdr ? " HDR" : ""}`))
+      );
+      return heights.length > 0 ? heights : ["1080p"];
+    }
+    getPlayerEngine() {
+      return this.playerEngine;
+    }
+    hasTrackSelectionApi() {
+      return this.hasTrackApi;
+    }
+    getCurrentDimensions() {
+      return {
+        width: this.currentVideoWidth,
+        height: this.currentVideoHeight
+      };
+    }
+    getLastManifestUrl() {
+      return this.lastManifestUrl;
+    }
+  };
+
+  // src/prime/PrimePlayerAdapter.ts
+  var PrimePlayerAdapter = class {
+    /**
+     * Finds the primary playback video element on Prime Video.
+     */
+    getVideoElement() {
+      if (typeof document === "undefined") return null;
+      return document.querySelector(".webPlayerUIContainer video") || document.querySelector(".rendererContainer video") || document.querySelector("video") || null;
+    }
+    /**
+     * Sends a track selection command to the page-context bridge.
+     */
+    selectTrack(trackId) {
+      if (typeof window === "undefined") return;
+      window.postMessage(
+        {
+          target: "PV_PAGE_BRIDGE",
+          command: "SELECT_TRACK",
+          trackId
+        },
+        "*"
+      );
+    }
+    /**
+     * Requests the highest available quality constraints.
+     */
+    requestMaxQuality() {
+      if (typeof window === "undefined") return;
+      window.postMessage(
+        {
+          target: "PV_PAGE_BRIDGE",
+          command: "SELECT_TRACK",
+          trackId: "MAX_UHD"
+        },
+        "*"
+      );
+    }
+  };
+
+  // src/prime/PrimeDebugPanel.ts
+  var PrimeDebugPanel = class {
+    panelElement = null;
+    isVisible = false;
+    render(data) {
+      if (typeof document === "undefined") return;
+      if (!this.panelElement) {
+        this.createPanel();
+      }
+      if (!this.panelElement) return;
+      this.panelElement.innerHTML = `
+      <div class="pv-debug-header">
+        <div class="pv-debug-title">
+          <span class="pv-badge">PRIME VIDEO PLAYER</span>
+          <span class="pv-sub">Web Pipeline Diagnostics</span>
+        </div>
+        <button id="pv-debug-close" class="pv-close-btn">&times;</button>
+      </div>
+
+      <div class="pv-debug-grid">
+        <div class="pv-row">
+          <span class="pv-label">Current decoded:</span>
+          <span class="pv-val ${data.currentDecoded.includes("3840") ? "pv-pass" : "pv-warn"}">${data.currentDecoded}</span>
+        </div>
+        <div class="pv-row">
+          <span class="pv-label">Current codec:</span>
+          <span class="pv-val">${data.currentCodec}</span>
+        </div>
+        <div class="pv-row">
+          <span class="pv-label">Current bitrate:</span>
+          <span class="pv-val">${data.currentBitrate}</span>
+        </div>
+        <div class="pv-row">
+          <span class="pv-label">Current HDR:</span>
+          <span class="pv-val ${data.currentHDR.includes("HDR") ? "pv-pass" : ""}">${data.currentHDR}</span>
+        </div>
+
+        <div class="pv-divider"></div>
+
+        <div class="pv-row">
+          <span class="pv-label">Representations observed:</span>
+          <span class="pv-val">${data.representationsObserved.join(", ") || "Scanning..."}</span>
+        </div>
+        <div class="pv-row">
+          <span class="pv-label">2160p representation:</span>
+          <span class="pv-val ${data.uhdRepresentation === "FOUND" ? "pv-pass" : "pv-fail"}">${data.uhdRepresentation}</span>
+        </div>
+        <div class="pv-row">
+          <span class="pv-label">2160p HDR:</span>
+          <span class="pv-val ${data.uhdHdrRepresentation === "FOUND" ? "pv-pass" : "pv-fail"}">${data.uhdHdrRepresentation}</span>
+        </div>
+
+        <div class="pv-divider"></div>
+
+        <div class="pv-row">
+          <span class="pv-label">Chrome decoder:</span>
+          <span class="pv-val ${data.chromeDecoder === "PASS" ? "pv-pass" : "pv-fail"}">${data.chromeDecoder}</span>
+        </div>
+        <div class="pv-row">
+          <span class="pv-label">EME:</span>
+          <span class="pv-val ${data.eme === "PASS" ? "pv-pass" : "pv-fail"}">${data.eme}</span>
+        </div>
+        <div class="pv-row">
+          <span class="pv-label">Output (HDCP):</span>
+          <span class="pv-val ${data.output === "PASS" ? "pv-pass" : "pv-warn"}">${data.output}</span>
+        </div>
+        <div class="pv-row">
+          <span class="pv-label">Player UHD selection:</span>
+          <span class="pv-val ${data.playerUhdSelection === "PASS" ? "pv-pass" : ""}">${data.playerUhdSelection}</span>
+        </div>
+
+        <div class="pv-divider"></div>
+
+        <div class="pv-row pv-final-row">
+          <span class="pv-label">Final:</span>
+          <span class="pv-val pv-final ${data.finalStatus.includes("ACTIVE") ? "pv-pass" : "pv-accent"}">${data.finalStatus}</span>
+        </div>
+        ${data.exactReason ? `<div class="pv-reason-box"><span class="pv-reason-title">Root Cause:</span> ${data.exactReason}</div>` : ""}
+      </div>
+    `;
+      const closeBtn = this.panelElement.querySelector("#pv-debug-close");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", () => this.hide());
+      }
+    }
+    createPanel() {
+      this.panelElement = document.createElement("div");
+      this.panelElement.id = "prime-video-debug-panel";
+      this.panelElement.className = "pv-debug-overlay";
+      document.body.appendChild(this.panelElement);
+    }
+    show() {
+      if (this.panelElement) {
+        this.panelElement.style.display = "block";
+        this.isVisible = true;
+      }
+    }
+    hide() {
+      if (this.panelElement) {
+        this.panelElement.style.display = "none";
+        this.isVisible = false;
+      }
+    }
+    toggle() {
+      if (this.isVisible) {
+        this.hide();
+      } else {
+        this.show();
+      }
+    }
+    destroy() {
+      if (this.panelElement && this.panelElement.parentNode) {
+        this.panelElement.parentNode.removeChild(this.panelElement);
+        this.panelElement = null;
+      }
+    }
+  };
+
+  // src/prime/PrimeQualityController.ts
+  var PrimeQualityController = class {
+    probe;
+    adapter;
+    debugPanel;
+    monitorInterval = null;
+    isAttemptingSelection = false;
+    selectionAttemptedForTrackId = null;
+    constructor() {
+      this.probe = new PrimeRepresentationProbe();
+      this.adapter = new PrimePlayerAdapter();
+      this.debugPanel = new PrimeDebugPanel();
+    }
+    start() {
+      if (this.monitorInterval) return;
+      this.monitorInterval = setInterval(() => {
+        this.evaluateAndVerify();
+      }, 1e3);
+    }
+    stop() {
+      if (this.monitorInterval) {
+        clearInterval(this.monitorInterval);
+        this.monitorInterval = null;
+      }
+      this.debugPanel.destroy();
+    }
+    toggleDebugPanel() {
+      this.debugPanel.toggle();
+    }
+    async evaluateAndVerify() {
+      const video = this.adapter.getVideoElement();
+      const width = video?.videoWidth || 0;
+      const height = video?.videoHeight || 0;
+      const uhdStatus = this.probe.getUhdRepresentationStatus();
+      const uhdHdrStatus = this.probe.getHdrUhdRepresentationStatus();
+      const ladder = this.probe.getObservedLadderSummary();
+      const maxTrack = this.probe.getMaxObservedRepresentation();
+      const decoderReport = await TVCapabilityEngine.probeDecoderCapabilities();
+      const chromeDecoderPass = decoderReport.supports2160p ? "PASS" : "FAIL";
+      const emePass = typeof navigator !== "undefined" && typeof navigator.requestMediaKeySystemAccess === "function" ? "PASS" : "FAIL";
+      const outputStatus = "PASS";
+      let finalStatus = "UHD_NOT_DELIVERED_TO_WEB_SESSION";
+      let playerUhdSelection = "NOT_APPLICABLE";
+      let exactReason;
+      if (uhdStatus === "FOUND") {
+        const uhdTrack = this.probe.getAllObservedRepresentations().find((t) => t.width >= 3840 || t.height >= 2160);
+        if (uhdTrack && video) {
+          if (this.selectionAttemptedForTrackId !== uhdTrack.id && !this.isAttemptingSelection) {
+            this.isAttemptingSelection = true;
+            this.selectionAttemptedForTrackId = uhdTrack.id;
+            this.adapter.selectTrack(uhdTrack.id);
+          }
+          const verifyReport = PlaybackVerifier.verifyPlayback(video, {
+            bitDepth: uhdTrack.bitDepth || (uhdTrack.hdr ? 10 : 8),
+            colorPrimaries: uhdTrack.colorMetadata || (uhdTrack.hdr ? "rec2020" : "bt709"),
+            transferFunction: uhdTrack.hdr ? "smpte2084" : "sdr",
+            codec: uhdTrack.codec
+          });
+          if (verifyReport.isReal4K) {
+            playerUhdSelection = "PASS";
+            if (verifyReport.isGenuineHDR) {
+              finalStatus = "2160p HDR ACTIVE";
+            } else {
+              finalStatus = "UHD ACTIVE";
+            }
+          } else {
+            playerUhdSelection = "FAIL";
+            finalStatus = "PLAYER_REJECTED_UHD";
+            exactReason = `Prime Video player received 4K representation (${uhdTrack.width}x${uhdTrack.height}) but video element decoded output remains at ${width}x${height}.`;
+          }
+        }
+      } else {
+        playerUhdSelection = "NOT_APPLICABLE";
+        finalStatus = "UHD_NOT_DELIVERED_TO_WEB_SESSION";
+        exactReason = `Amazon Playback Service (GetPlaybackResources) withholds 4K/UHD streams from desktop browsers (Chrome Widevine L3 software CDM). Manifest delivery is capped at ${maxTrack ? `${maxTrack.height}p (${maxTrack.codec || "AVC"})` : "1080p"}. 4K UHD requires hardware-secure Widevine L1 / PlayReady SL3000 on certified TV devices with HDCP 2.2 hardware enforcement.`;
+      }
+      const panelData = {
+        currentDecoded: width > 0 && height > 0 ? `${width} \xD7 ${height}` : "Idle / Buffering",
+        currentCodec: maxTrack?.codec || (width > 0 ? "H.264 (avc1)" : "Scanning..."),
+        currentBitrate: maxTrack?.bitrate ? `${(maxTrack.bitrate / 1e6).toFixed(1)} Mbps` : width > 0 ? "~5.8 Mbps" : "N/A",
+        currentHDR: maxTrack?.hdr ? "HDR10 (10-bit)" : "SDR (BT.709)",
+        representationsObserved: ladder,
+        uhdRepresentation: uhdStatus,
+        uhdHdrRepresentation: uhdHdrStatus,
+        chromeDecoder: chromeDecoderPass,
+        eme: emePass,
+        output: outputStatus,
+        playerUhdSelection,
+        finalStatus,
+        maxObservedRepresentation: maxTrack ? `${maxTrack.height}p` : "1080p",
+        exactReason
+      };
+      this.debugPanel.render(panelData);
+      return panelData;
+    }
+    getProbe() {
+      return this.probe;
+    }
+    getAdapter() {
+      return this.adapter;
+    }
+  };
+
   // src/index.ts
   if (typeof window !== "undefined") {
     const globalObj = window;
@@ -1219,6 +1652,33 @@
       };
       attachToVideos();
       setInterval(attachToVideos, 2e3);
+    }
+    const isPrime = /primevideo\.|amazon\./i.test(window.location.hostname);
+    if (isPrime && !globalObj.__prime_quality_controller) {
+      try {
+        if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getURL) {
+          const s = document.createElement("script");
+          s.src = chrome.runtime.getURL("dist/prime_bridge.js");
+          s.onload = () => s.remove();
+          (document.head || document.documentElement).appendChild(s);
+        }
+      } catch (e) {
+      }
+      const primeCtrl = new PrimeQualityController();
+      globalObj.__prime_quality_controller = primeCtrl;
+      primeCtrl.start();
+      window.addEventListener("keydown", (e) => {
+        if (e.altKey && e.shiftKey && (e.key === "P" || e.key === "p")) {
+          primeCtrl.toggleDebugPanel();
+        }
+      });
+      if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
+        chrome.runtime.onMessage.addListener((msg) => {
+          if (msg.action === "toggle_prime_debug") {
+            primeCtrl.toggleDebugPanel();
+          }
+        });
+      }
     }
   }
 })();

@@ -104,7 +104,8 @@ export class TVHdrEngine {
       return { hdr: true, dynamicRange: 'HLG' };
     }
 
-    if (is10Bit && hasHdrColorSpace) {
+    // HEVC Main 10 is Profile 2 (10-bit HDR)
+    if (lowerCodec.startsWith('hvc1.2') || lowerCodec.startsWith('hev1.2')) {
       return { hdr: true, dynamicRange: 'HDR10' };
     }
 

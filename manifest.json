@@ -38,6 +38,13 @@
         "mac": "Alt+Shift+D"
       },
       "description": "Toggle TV Mode Diagnostics HUD"
+    },
+    "toggle_prime_debug": {
+      "suggested_key": {
+        "default": "Alt+Shift+P",
+        "mac": "Alt+Shift+P"
+      },
+      "description": "Toggle Prime Video Player Debug Panel"
     }
   },
   "host_permissions": [
@@ -60,6 +67,24 @@
     "service_worker": "background/service_worker.js"
   },
   "content_scripts": [
+    {
+      "matches": [
+        "*://*.primevideo.com/*",
+        "*://*.amazon.com/*",
+        "*://*.amazon.in/*",
+        "*://*.amazon.co.uk/*",
+        "*://*.amazon.de/*",
+        "*://*.amazon.co.jp/*",
+        "*://*.amazon.fr/*",
+        "*://*.amazon.es/*",
+        "*://*.amazon.it/*",
+        "*://*.amazon.ca/*",
+        "*://*.amazon.com.au/*"
+      ],
+      "js": ["dist/prime_bridge.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
     {
       "matches": [
         "*://*.hotstar.com/*",

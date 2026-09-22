@@ -13,6 +13,8 @@ import { TVHdrEngine } from '../core/TVHdrEngine';
 import { TVRepresentationAnalyzer } from '../core/TVRepresentationAnalyzer';
 import { TVModeController } from '../core/TVModeController';
 import { TVDiagnostics } from '../core/TVDiagnostics';
+import { PlaybackVerifier } from '../core/PlaybackVerifier';
+import { PlaybackVerificationReport } from '../types/drm_research';
 import {
   SAMPLE_4K_HDR_HLS_MANIFEST,
   SAMPLE_4K_HDR_DASH_MANIFEST,
@@ -97,7 +99,7 @@ export class TVTestLab {
     setInterval(() => this.updateTelemetryUI(), 1000);
   }
 
-  public loadSampleManifest(type: '4k-hdr-hls' | '4k-hdr-dash' | '1080p-hls'): void {
+  public async loadSampleManifest(type: '4k-hdr-hls' | '4k-hdr-dash' | '1080p-hls'): Promise<void> {
     if (type === '4k-hdr-hls') {
       this.currentManifestText = SAMPLE_4K_HDR_HLS_MANIFEST;
       this.parsedRepresentations = TVRepresentationAnalyzer.parseHlsMasterPlaylist(this.currentManifestText);
@@ -109,15 +111,15 @@ export class TVTestLab {
       this.parsedRepresentations = TVRepresentationAnalyzer.parseHlsMasterPlaylist(this.currentManifestText);
     }
 
-    this.controller.setRepresentations(this.parsedRepresentations);
+    await this.controller.setRepresentations(this.parsedRepresentations);
     this.renderRepresentationsTable();
   }
 
-  public applyProfile(profileKey: string): void {
+  public async applyProfile(profileKey: string): Promise<void> {
     const profile = TV_PRESET_PROFILES[profileKey];
     if (profile) {
       this.controller.updateProfile(profile);
-      this.controller.reselectQuality();
+      await this.controller.reselectQuality();
       this.renderRepresentationsTable();
     }
   }
@@ -145,6 +147,16 @@ export class TVTestLab {
     }
   }
 
+  public verifyControlExperiment(video: HTMLVideoElement): PlaybackVerificationReport {
+    const activeRep = this.controller.getActiveRepresentation();
+    return PlaybackVerifier.verifyPlayback(video, {
+      bitDepth: activeRep?.bitDepth,
+      colorPrimaries: activeRep?.colorSpace,
+      transferFunction: activeRep?.dynamicRange === 'HDR10' ? 'smpte2084' : 'sdr',
+      codec: activeRep?.codec
+    });
+  }
+
   private async refreshCapabilitiesUI(): Promise<void> {
     const display = TVCapabilityEngine.getDisplayCapability();
     const decoder = await TVCapabilityEngine.probeDecoderCapabilities();
@@ -169,6 +181,7 @@ export class TVTestLab {
   }
 
   private renderRepresentationsTable(): void {
+    if (typeof document === 'undefined') return;
     const tbody = document.getElementById('labRepsTbody');
     if (!tbody) return;
 

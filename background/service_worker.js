@@ -68,6 +68,12 @@ chrome.commands.onCommand.addListener((command) => {
         chrome.tabs.sendMessage(tabs[0].id, { action: 'TOGGLE_TV_HUD' }).catch(() => {});
       }
     });
+  } else if (command === 'toggle_prime_debug') {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'toggle_prime_debug' }).catch(() => {});
+      }
+    });
   }
 });
 

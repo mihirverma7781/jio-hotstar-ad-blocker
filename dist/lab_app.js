@@ -246,7 +246,7 @@
       if (hasHlgColorSpace) {
         return { hdr: true, dynamicRange: "HLG" };
       }
-      if (is10Bit && hasHdrColorSpace) {
+      if (lowerCodec.startsWith("hvc1.2") || lowerCodec.startsWith("hev1.2")) {
         return { hdr: true, dynamicRange: "HDR10" };
       }
       if (lowerCodec.startsWith("vp09.02") && lowerCodec.includes(".16.")) {
@@ -1170,6 +1170,86 @@
     }
   };
 
+  // src/core/PlaybackVerifier.ts
+  var PlaybackVerifier = class _PlaybackVerifier {
+    /**
+     * Verifies whether an HTMLVideoElement is playing genuine 4K UHD decoded frames.
+     * STRICT SUCCESS CRITERION: video.videoWidth >= 3840 && video.videoHeight >= 2160.
+     */
+    static verifyPlayback(video, contentMetadata) {
+      const actualWidth = video.videoWidth || 0;
+      const actualHeight = video.videoHeight || 0;
+      const isRealUHDWidth = actualWidth >= 3840;
+      const isRealUHDHeight = actualHeight >= 2160;
+      const isReal4K = isRealUHDWidth && isRealUHDHeight;
+      let totalFrames = 0;
+      let droppedFrames = 0;
+      let droppedRatio = 0;
+      if (typeof video.getVideoPlaybackQuality === "function") {
+        const q = video.getVideoPlaybackQuality();
+        totalFrames = q.totalVideoFrames;
+        droppedFrames = q.droppedVideoFrames;
+        droppedRatio = totalFrames > 0 ? droppedFrames / totalFrames : 0;
+      }
+      const transfer = contentMetadata?.transferFunction?.toLowerCase() || "";
+      const primaries = contentMetadata?.colorPrimaries?.toLowerCase() || "";
+      const bitDepth = contentMetadata?.bitDepth === 10 ? 10 : 8;
+      const isPqOrHlg = transfer.includes("smpte2084") || transfer.includes("pq") || transfer.includes("arib-std-b67") || transfer.includes("hlg") || transfer === "16" || transfer === "18";
+      const isWideColor = primaries.includes("rec2020") || primaries.includes("bt2020") || primaries.includes("p3") || primaries === "9";
+      const isGenuineHDR = isPqOrHlg || bitDepth === 10 && isWideColor;
+      const evidence = [];
+      evidence.push(`Decoded Dimensions: ${actualWidth}x${actualHeight}`);
+      if (isReal4K) {
+        evidence.push("4K UHD Dimension Threshold Passed (>= 3840x2160)");
+      } else {
+        evidence.push(`4K UHD Dimension Threshold Failed (${actualWidth}x${actualHeight} < 3840x2160)`);
+      }
+      if (isGenuineHDR) {
+        evidence.push(`Genuine HDR Confirmed: Transfer=${contentMetadata?.transferFunction || "PQ"}, BitDepth=${bitDepth}`);
+      } else {
+        evidence.push("SDR Content Stream (8-bit / Standard Dynamic Range)");
+      }
+      return {
+        isReal4K,
+        isRealUHDWidth,
+        isRealUHDHeight,
+        actualVideoWidth: actualWidth,
+        actualVideoHeight: actualHeight,
+        isGenuineHDR,
+        colorSpace: contentMetadata?.colorPrimaries || "bt709",
+        transferFunction: contentMetadata?.transferFunction || "sdr",
+        bitDepth,
+        totalFrames,
+        droppedFrames,
+        droppedFramesRatio: droppedRatio,
+        verificationPassed: isReal4K,
+        evidence
+      };
+    }
+    /**
+     * Continuous verification observer that resolves when actual decoded 4K frames arrive,
+     * or times out after a specified duration.
+     */
+    static async waitFor4KVerification(video, timeoutMs = 8e3) {
+      const start = Date.now();
+      return new Promise((resolve) => {
+        const check = () => {
+          const report = _PlaybackVerifier.verifyPlayback(video);
+          if (report.isReal4K) {
+            resolve(report);
+            return;
+          }
+          if (Date.now() - start >= timeoutMs) {
+            resolve(report);
+            return;
+          }
+          requestAnimationFrame(check);
+        };
+        check();
+      });
+    }
+  };
+
   // src/lab/sample_manifests.ts
   var SAMPLE_4K_HDR_HLS_MANIFEST = `#EXTM3U
 #EXT-X-VERSION:7
@@ -1302,7 +1382,7 @@ manifest_720p_sdr_h264.m3u8
       this.refreshCapabilitiesUI();
       setInterval(() => this.updateTelemetryUI(), 1e3);
     }
-    loadSampleManifest(type) {
+    async loadSampleManifest(type) {
       if (type === "4k-hdr-hls") {
         this.currentManifestText = SAMPLE_4K_HDR_HLS_MANIFEST;
         this.parsedRepresentations = TVRepresentationAnalyzer.parseHlsMasterPlaylist(this.currentManifestText);
@@ -1313,14 +1393,14 @@ manifest_720p_sdr_h264.m3u8
         this.currentManifestText = SAMPLE_1080P_ONLY_HLS_MANIFEST;
         this.parsedRepresentations = TVRepresentationAnalyzer.parseHlsMasterPlaylist(this.currentManifestText);
       }
-      this.controller.setRepresentations(this.parsedRepresentations);
+      await this.controller.setRepresentations(this.parsedRepresentations);
       this.renderRepresentationsTable();
     }
-    applyProfile(profileKey) {
+    async applyProfile(profileKey) {
       const profile = TV_PRESET_PROFILES[profileKey];
       if (profile) {
         this.controller.updateProfile(profile);
-        this.controller.reselectQuality();
+        await this.controller.reselectQuality();
         this.renderRepresentationsTable();
       }
     }
@@ -1345,6 +1425,15 @@ manifest_720p_sdr_h264.m3u8
       `;
       }
     }
+    verifyControlExperiment(video) {
+      const activeRep = this.controller.getActiveRepresentation();
+      return PlaybackVerifier.verifyPlayback(video, {
+        bitDepth: activeRep?.bitDepth,
+        colorPrimaries: activeRep?.colorSpace,
+        transferFunction: activeRep?.dynamicRange === "HDR10" ? "smpte2084" : "sdr",
+        codec: activeRep?.codec
+      });
+    }
     async refreshCapabilitiesUI() {
       const display = TVCapabilityEngine.getDisplayCapability();
       const decoder = await TVCapabilityEngine.probeDecoderCapabilities();
@@ -1366,6 +1455,7 @@ manifest_720p_sdr_h264.m3u8
       }
     }
     renderRepresentationsTable() {
+      if (typeof document === "undefined") return;
       const tbody = document.getElementById("labRepsTbody");
       if (!tbody) return;
       const activeRep = this.controller.getActiveRepresentation();

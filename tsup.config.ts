@@ -3,7 +3,8 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: {
     tv_mode: 'src/index.ts',
-    lab_app: 'src/lab/TVTestLab.ts'
+    lab_app: 'src/lab/TVTestLab.ts',
+    prime_bridge: 'src/prime/prime_bridge.ts'
   },
   format: ['iife'],
   outDir: 'dist',
