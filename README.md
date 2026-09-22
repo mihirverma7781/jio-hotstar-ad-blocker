@@ -12,33 +12,41 @@ Modeled after popular OTT ad-skippers (like *Ad Skipper for Prime Video*), this 
 * **🔇 Auto-Mute & Volume Restore**: Silences ad audio automatically while active, and cleanly restores your previous listening volume once your show or movie resumes.
 * **⏩ Auto-Click "Skip Ad" Buttons**: Instantly detects and clicks "Skip Ad", "Skip", "Skip Intro", and "Skip Recap" buttons the exact millisecond they become clickable.
 * **🎯 Instant Seek**: Attempts to seek directly to the end of seekable pre-roll and mid-roll ad segments.
+* **🚫 In-Webapp Banner & Billboard Purge**: Removes invasive homepage billboard ads, companion promo cards, and subscription nudges for a clean interface.
 * **🕶️ Blur / Dim Screen Veil**: Minimizes disruptive, loud visual ads by applying a subtle blur veil with an unobtrusive *"Skipping Ad ⚡"* HUD indicator.
 * **🛡️ Network Tracking Filter**: Employs Manifest V3 `declarativeNetRequest` rules to suppress external telemetry and ad trackers.
 * **📊 Real-time Dashboard**: Track your total number of ads skipped and total hours/minutes saved directly in the popup interface.
 
 ---
 
-## 🛠️ How It Works (Multi-Layered Architecture)
+## 🛠️ How It Works (Safe, Zero-Freeze Architecture)
 
-1. **Main-World Hooking (`content/injector.js`)**: Runs directly within the page context to prevent website player scripts from throttling playback speed back to `1.0x` during ad breaks.
-2. **DOM & Player Detection (`content/detector.js`)**: Employs an ultra-low-overhead `MutationObserver` and periodic scanner to detect ad badges, timers, and skip prompts across Hotstar and JioCinema.
-3. **Network Beacon Interception (`background/service_worker.js`)**: Listens for server-guided ad impression events (e.g. `bifrost-api.hotstar.com`) to alert the active tab before DOM changes take effect.
-4. **DeclarativeNetRequest Filter (`rules/ad_rules.json`)**: Pre-emptively blocks third-party trackers (Scorecard, Conviva, Adobe DTM, Pubmatic, etc.) without affecting video playback.
+1. **Pure Isolated Content Script (`content/detector.js`)**: Runs in Chrome's safe isolated sandbox with zero risk of interfering with Widevine DRM or encrypted DASH streaming chunks. Uses a lightweight 250ms scanner consuming near 0% CPU.
+2. **Accurate In-Video Ad Detection**: Directly detects Hotstar's in-video cues:
+   * `"Go Ads free"` button
+   * `"Ad · 00:xx"` / `Ad • mm:ss` countdown timer
+   * `Ad 1 of 2`
+3. **Multi-Video Acceleration**: Automatically targets and speeds up all active `<video>` elements to 16x speed and mutes loud commercial audio.
+4. **Cosmetic & Network Filtering (`rules/ad_rules.json` & `content/styles.css`)**: Suppresses external telemetry (Scorecard, Conviva, Pubmatic, etc.) and hides cosmetic ad banners.
 
 ---
 
 ## 📦 Installation Instructions (Chrome / Brave / Edge)
 
-1. Open **Google Chrome** (or Brave, Edge, Opera).
-2. Navigate to `chrome://extensions/` in your address bar.
-3. Enable **Developer mode** using the toggle in the top-right corner.
-4. Click the **"Load unpacked"** button in the top-left corner.
-5. Select this project folder:
+1. Clone or download this repository:
+   ```bash
+   git clone https://github.com/mihirverma7781/jio-hotstar-ad-blocker.git
    ```
-   /Users/mihirverma/jiohotstar-adblocker
+2. Open your Chromium browser (Google Chrome, Brave, Microsoft Edge, Opera, or Vivaldi).
+3. Navigate to `chrome://extensions/` in your address bar.
+4. Enable **Developer mode** using the toggle in the top-right corner.
+5. Click the **"Load unpacked"** button in the top-left corner.
+6. Select the cloned project directory:
+   ```bash
+   path/to/jio-hotstar-ad-blocker
    ```
-6. The **JioHotstar Ad Skipper & Blocker** extension is now installed and active!
-7. Pin the extension icon to your toolbar for quick access to settings and statistics.
+7. The **JioHotstar Ad Skipper & Blocker** extension is now installed and active!
+8. Pin the extension icon to your browser toolbar for quick access to settings and statistics.
 
 ---
 
@@ -52,6 +60,7 @@ Click the extension icon in your browser toolbar to customize:
 * **Instant Seek**: Toggle direct seeking for ad clips.
 * **Blur / Dim Ad Video**: Toggle the visual veil effect.
 * **Skip Intros & Recaps**: Toggle auto-skipping of show intros and recaps.
+* **Block In-App Banners**: Toggle hiding of home feed billboard promos.
 * **Reset Stats**: Clear accumulated ads skipped and time saved counters.
 
 ---
@@ -59,14 +68,20 @@ Click the extension icon in your browser toolbar to customize:
 ## 📁 Project Structure
 
 ```
-jiohotstar-adblocker/
+jio-hotstar-ad-blocker/
+├── index.html                 # Modern minimalist landing page for GitHub Pages
+├── style.css                  # Landing page dark glassmorphic styling
+├── script.js                  # Interactive ad-bypass simulation player
+├── assets/                    # Visual assets for GitHub Pages
+│   ├── hero.jpg               # Cinema screen preview graphic
+│   └── control-panel.jpg      # Extension popup preview mockup
+├── docs/                      # GitHub Pages deployment mirror
 ├── manifest.json              # Extension Manifest V3 configuration
 ├── background/
-│   └── service_worker.js     # Beacon detection & statistics manager
+│   └── service_worker.js     # Badge status & statistics manager
 ├── content/
-│   ├── detector.js           # Content script watcher & video controller
-│   ├── injector.js           # Main-world script for playbackRate protection
-│   └── styles.css            # Styling for blur veil and skipping HUD
+│   ├── detector.js           # Safe in-video ad detector & 16x speedup engine
+│   └── styles.css            # Ad veil & banner cleanup styles
 ├── popup/
 │   ├── popup.html            # Settings & dashboard popup
 │   ├── popup.js              # Popup controller logic
@@ -76,3 +91,9 @@ jiohotstar-adblocker/
 ├── icons/                    # Extension icons (16, 32, 48, 128 px)
 └── README.md                 # Project documentation
 ```
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
