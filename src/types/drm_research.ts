@@ -21,6 +21,9 @@ export type PrimePlaybackCeiling =
   | 'HDCP_RESTRICTED'
   | 'HDR_UNSUPPORTED'
   | 'NETWORK_LIMIT'
+  | 'REAL_UHD_ACTIVE'
+  | 'REAL_HDR_UHD_ACTIVE'
+  | 'UHD_PRESENT_BUT_NOT_SELECTED'
   | 'UNKNOWN';
 
 export interface PlaybackVerificationReport {
@@ -55,7 +58,14 @@ export interface PrimeObservedTrack {
 
 export interface PrimeProbeEventPayload {
   type: 'PV_MEDIA_PROBE_EVENT';
-  action: 'MANIFEST_LOADED' | 'SOURCEBUFFER_INIT' | 'PLAYER_DETECTED' | 'PLAYBACK_SAMPLE';
+  action:
+    | 'MANIFEST_LOADED'
+    | 'SOURCEBUFFER_INIT'
+    | 'PLAYER_DETECTED'
+    | 'PLAYBACK_SAMPLE'
+    | 'PLAYBACK_RESOURCES_CAPTURED'
+    | 'SDK_API_DEEP_SCAN'
+    | 'SEGMENT_APPEND';
   manifestUrl?: string;
   manifestType?: 'DASH' | 'HLS' | 'SMOOTH' | 'UNKNOWN';
   observedRepresentations?: PrimeObservedTrack[];
@@ -68,6 +78,18 @@ export interface PrimeProbeEventPayload {
   currentTime?: number;
   videoWidth?: number;
   videoHeight?: number;
+  // PLAYBACK_RESOURCES_CAPTURED fields
+  requestUrl?: string;
+  requestBody?: string;
+  responseBody?: string;
+  deviceTypeIdentifier?: string;
+  maxResolutionFromResponse?: string;
+  rawRepresentationsFromResponse?: any[];
+  // SDK_API_DEEP_SCAN fields
+  discoveredApis?: string[];
+  // SEGMENT_APPEND fields
+  boxType?: string;
+  byteLength?: number;
 }
 
 export interface PrimeDebugPanelData {
@@ -85,4 +107,15 @@ export interface PrimeDebugPanelData {
   finalStatus: string;                           // "UHD_NOT_DELIVERED_TO_WEB_SESSION" or "2160p HDR"
   maxObservedRepresentation?: string;
   exactReason?: string;
+  /** ABR controller tier: 'startup' | 'stable' | 'recovering' | 'degraded' */
+  abrTier?: string;
+  /** Last 20 ABR decisions from PrimeTVAbrController */
+  abrDecisionLog?: any[];
+  /** Evidence captured from GetPlaybackResources / SDK discovery */
+  playbackResourcesInfo?: {
+    deviceTypeIdentifier?: string;
+    maxResolutionFromResponse?: string;
+    discoveredSdkApis?: string[];
+  };
 }
+

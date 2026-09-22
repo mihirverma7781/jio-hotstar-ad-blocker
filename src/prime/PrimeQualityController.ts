@@ -7,6 +7,7 @@
 import { PrimeRepresentationProbe } from './PrimeRepresentationProbe';
 import { PrimePlayerAdapter } from './PrimePlayerAdapter';
 import { PrimeDebugPanel } from './PrimeDebugPanel';
+import { PrimeTVAbrController, AbrDecision } from './PrimeTVAbrController';
 import { PlaybackVerifier } from '../core/PlaybackVerifier';
 import { TVCapabilityEngine } from '../core/TVCapabilityEngine';
 import { TVHdrEngine } from '../core/TVHdrEngine';
@@ -20,6 +21,7 @@ export class PrimeQualityController {
   private probe: PrimeRepresentationProbe;
   private adapter: PrimePlayerAdapter;
   private debugPanel: PrimeDebugPanel;
+  private abrController: PrimeTVAbrController | null = null;
   private monitorInterval: any = null;
   private isAttemptingSelection: boolean = false;
   private selectionAttemptedForTrackId: string | null = null;
@@ -33,6 +35,13 @@ export class PrimeQualityController {
   public start(): void {
     if (this.monitorInterval) return;
 
+    // Bootstrap ABR controller with the video element if available
+    const video = this.adapter.getVideoElement();
+    if (video && !this.abrController) {
+      this.abrController = new PrimeTVAbrController(video);
+      this.abrController.start();
+    }
+
     this.monitorInterval = setInterval(() => {
       this.evaluateAndVerify();
     }, 1000);
@@ -43,6 +52,7 @@ export class PrimeQualityController {
       clearInterval(this.monitorInterval);
       this.monitorInterval = null;
     }
+    this.abrController?.stop();
     this.debugPanel.destroy();
   }
 
@@ -55,10 +65,22 @@ export class PrimeQualityController {
     const width = video?.videoWidth || 0;
     const height = video?.videoHeight || 0;
 
+    // Lazily initialise ABR controller once video element is available
+    if (video && !this.abrController) {
+      this.abrController = new PrimeTVAbrController(video);
+      this.abrController.start();
+    }
+
     const uhdStatus = this.probe.getUhdRepresentationStatus();
     const uhdHdrStatus = this.probe.getHdrUhdRepresentationStatus();
     const ladder = this.probe.getObservedLadderSummary();
     const maxTrack = this.probe.getMaxObservedRepresentation();
+
+    // Feed current representation ladder into the ABR controller
+    const allTracks = this.probe.getAllObservedRepresentations();
+    if (this.abrController && allTracks.length > 0) {
+      this.abrController.onRepresentationsUpdate(allTracks);
+    }
 
     // Probe Chrome decoder capability for 4K
     const decoderReport = await TVCapabilityEngine.probeDecoderCapabilities();
@@ -115,6 +137,9 @@ export class PrimeQualityController {
       exactReason = `Amazon Playback Service (GetPlaybackResources) withholds 4K/UHD streams from desktop browsers (Chrome Widevine L3 software CDM). Manifest delivery is capped at ${maxTrack ? `${maxTrack.height}p (${maxTrack.codec || 'AVC'})` : '1080p'}. 4K UHD requires hardware-secure Widevine L1 / PlayReady SL3000 on certified TV devices with HDCP 2.2 hardware enforcement.`;
     }
 
+    const abrTier = this.abrController?.getCurrentTier() ?? 'startup';
+    const abrDecisionLog: AbrDecision[] = this.abrController?.getDecisionLog() ?? [];
+
     const panelData: PrimeDebugPanelData = {
       currentDecoded: width > 0 && height > 0 ? `${width} × ${height}` : 'Idle / Buffering',
       currentCodec: maxTrack?.codec || (width > 0 ? 'H.264 (avc1)' : 'Scanning...'),
@@ -129,7 +154,9 @@ export class PrimeQualityController {
       playerUhdSelection,
       finalStatus,
       maxObservedRepresentation: maxTrack ? `${maxTrack.height}p` : '1080p',
-      exactReason
+      exactReason,
+      abrTier,
+      abrDecisionLog
     };
 
     this.debugPanel.render(panelData);
@@ -142,5 +169,9 @@ export class PrimeQualityController {
 
   public getAdapter(): PrimePlayerAdapter {
     return this.adapter;
+  }
+
+  public getAbrController(): PrimeTVAbrController | null {
+    return this.abrController;
   }
 }

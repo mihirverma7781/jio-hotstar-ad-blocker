@@ -24,6 +24,67 @@ import { PrimeObservedTrack, PrimeProbeEventPayload } from '../types/drm_researc
     }
   }
 
+  // ─── Helper: Deep-search a parsed JSON object for known resolution keys ────────
+  function deepSearchResolution(obj: any, depth = 0): string | undefined {
+    if (!obj || typeof obj !== 'object' || depth > 8) return undefined;
+    const resolutionKeys = [
+      'MaxResolution', 'maxResolution', '4K', 'UHD',
+      'VideoQuality', 'videoQuality', 'resolutions',
+    ];
+    for (const key of resolutionKeys) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const val = obj[key];
+        if (val !== null && val !== undefined) return String(val);
+      }
+    }
+    for (const key of Object.keys(obj)) {
+      const child = obj[key];
+      if (child && typeof child === 'object') {
+        const found = deepSearchResolution(child, depth + 1);
+        if (found) return found;
+      }
+    }
+    return undefined;
+  }
+
+  // ─── Helper: Deep-search for arrays that contain objects with width/height ────
+  function deepSearchRepresentations(obj: any, depth = 0): any[] | undefined {
+    if (!obj || typeof obj !== 'object' || depth > 8) return undefined;
+    if (Array.isArray(obj)) {
+      const hasWidthHeight = obj.some(
+        (item: any) => item && typeof item === 'object' &&
+          ('width' in item || 'height' in item)
+      );
+      if (hasWidthHeight) return obj;
+    }
+    for (const key of Object.keys(obj)) {
+      const child = obj[key];
+      if (child && typeof child === 'object') {
+        const found = deepSearchRepresentations(child, depth + 1);
+        if (found) return found;
+      }
+    }
+    return undefined;
+  }
+
+  // ─── Helper: Extract deviceTypeIdentifier from a URL's query params ───────────
+  function extractDeviceTypeFromUrl(url: string): string | undefined {
+    try {
+      const parsed = new URL(url);
+      for (const key of ['deviceTypeID', 'deviceType', 'deviceTypeId', 'device_type']) {
+        const val = parsed.searchParams.get(key);
+        if (val) return val;
+      }
+    } catch (_) {}
+    return undefined;
+  }
+
+  // ─── Helper: Extract deviceTypeIdentifier from request body text ──────────────
+  function extractDeviceTypeFromBody(body: string): string | undefined {
+    const match = body.match(/[Dd]evice[Tt]ype(?:I[Dd])?["\s:=]+([A-Za-z0-9_\-]+)/);
+    return match ? match[1] : undefined;
+  }
+
   // 1. Hook MediaSource.prototype.addSourceBuffer
   if (typeof window.MediaSource !== 'undefined' && window.MediaSource.prototype) {
     const originalAddSourceBuffer = window.MediaSource.prototype.addSourceBuffer;
@@ -40,6 +101,81 @@ import { PrimeObservedTrack, PrimeProbeEventPayload } from '../types/drm_researc
       return sb;
     };
   }
+
+  // ─── 1b. Hook SourceBuffer.prototype.appendBuffer for ISOBMFF box detection ───
+  // Broadcasts SEGMENT_APPEND at most once every 5 seconds to avoid flooding.
+  (function hookAppendBuffer() {
+    if (typeof (window as any).SourceBuffer === 'undefined') return;
+    const originalAppendBuffer = SourceBuffer.prototype.appendBuffer;
+    let lastSegmentBroadcast = 0;
+
+    SourceBuffer.prototype.appendBuffer = function (
+      data: BufferSource
+    ): void {
+      try {
+        const now = Date.now();
+        if (now - lastSegmentBroadcast >= 5000) {
+          let bytes: Uint8Array | null = null;
+          if (data instanceof Uint8Array) {
+            bytes = data;
+          } else if (data instanceof ArrayBuffer) {
+            bytes = new Uint8Array(data);
+          } else if (ArrayBuffer.isView(data)) {
+            bytes = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+          }
+
+          if (bytes && bytes.length >= 4) {
+            // Read 4-byte box type from bytes 4-7 (ISOBMFF: size[0-3] + type[4-7])
+            // For the very first box the type is at offset 4; but for small buffers check offset 4 first
+            let boxType = 'unknown';
+            if (bytes.length >= 8) {
+              const typeBytes = bytes.slice(4, 8);
+              boxType = String.fromCharCode(typeBytes[0], typeBytes[1], typeBytes[2], typeBytes[3]);
+            } else {
+              // Signature at byte 0 for 4-byte check (ftyp/moov/moof without size prefix)
+              const sig4 = (bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3]) >>> 0;
+              const FTYP = 0x66747970;
+              const MOOV = 0x6d6f6f76;
+              const MOOF = 0x6d6f6f66;
+              if (sig4 === FTYP) boxType = 'ftyp';
+              else if (sig4 === MOOV) boxType = 'moov';
+              else if (sig4 === MOOF) boxType = 'moof';
+            }
+
+            // Verify it's one of the known ISOBMFF boxes (type could be at offset 4)
+            const knownBoxes: Record<string, number> = {
+              ftyp: 0x66747970,
+              moov: 0x6d6f6f76,
+              moof: 0x6d6f6f66,
+            };
+            let resolvedBoxType = 'other';
+            if (bytes.length >= 8) {
+              const sig = (bytes[4] << 24 | bytes[5] << 16 | bytes[6] << 8 | bytes[7]) >>> 0;
+              for (const [name, code] of Object.entries(knownBoxes)) {
+                if (sig === code) { resolvedBoxType = name; break; }
+              }
+              // Also check at offset 0 for edge cases
+              if (resolvedBoxType === 'other') {
+                const sig0 = (bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3]) >>> 0;
+                for (const [name, code] of Object.entries(knownBoxes)) {
+                  if (sig0 === code) { resolvedBoxType = name; break; }
+                }
+              }
+            }
+
+            lastSegmentBroadcast = now;
+            broadcast({
+              type: 'PV_MEDIA_PROBE_EVENT',
+              action: 'SEGMENT_APPEND',
+              boxType: resolvedBoxType,
+              byteLength: bytes.byteLength,
+            });
+          }
+        }
+      } catch (_) {}
+      return originalAppendBuffer.call(this, data);
+    };
+  })();
 
   // 2. Parse DASH MPD text for video representations
   function parseDashManifestText(text: string, url: string) {
@@ -143,26 +279,70 @@ import { PrimeObservedTrack, PrimeProbeEventPayload } from '../types/drm_researc
     } catch (e) {}
   }
 
-  // 4. Intercept fetch for manifests
+  // 4. Intercept fetch for manifests — also capture full GetPlaybackResources / atv-ps req+res
   if (typeof window.fetch === 'function') {
     const originalFetch = window.fetch;
     window.fetch = async function (...args) {
       const response = await originalFetch.apply(this, args);
       try {
         const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request)?.url || '';
-        if (
+        const isPlaybackResources =
+          url.includes('GetPlaybackResources') || url.includes('atv-ps');
+        const isManifest =
           url.includes('.mpd') ||
           url.includes('.m3u8') ||
-          url.includes('GetPlaybackResources') ||
-          url.includes('playback.us-east-1.pv-cdn.net') ||
-          url.includes('atv-ps')
-        ) {
+          url.includes('playback.us-east-1.pv-cdn.net');
+
+        if (isPlaybackResources || isManifest) {
           const clone = response.clone();
+
+          // ── Always read full text (covers JSON, XML, and plain) ──────────────
           clone.text().then((text) => {
+            // Standard manifest handling (unchanged)
             if (text.includes('<MPD') || text.includes('urn:mpeg:dash')) {
               parseDashManifestText(text, url);
             } else if (text.includes('#EXTM3U')) {
               parseHlsManifestText(text, url);
+            }
+
+            // ── NEW: Full req+res capture for GetPlaybackResources / atv-ps ───
+            if (isPlaybackResources) {
+              // Capture request body
+              let rawBody = '';
+              try {
+                const init = args[1] as RequestInit | undefined;
+                if (init?.body != null) {
+                  rawBody = typeof init.body === 'string'
+                    ? init.body
+                    : JSON.stringify(init.body);
+                } else if (args[0] instanceof Request && (args[0] as Request).bodyUsed === false) {
+                  // Body already consumed by originalFetch; best-effort from init only
+                }
+              } catch (_) {}
+
+              // Try JSON parse for deep analysis
+              let parsedJson: any = null;
+              try { parsedJson = JSON.parse(text); } catch (_) {}
+
+              const maxRes = parsedJson ? deepSearchResolution(parsedJson) : undefined;
+              const rawReps = parsedJson ? deepSearchRepresentations(parsedJson) : undefined;
+
+              // Device type: from URL params, then from body text
+              const deviceType =
+                extractDeviceTypeFromUrl(url) ||
+                (rawBody ? extractDeviceTypeFromBody(rawBody) : undefined) ||
+                (text ? extractDeviceTypeFromBody(text) : undefined);
+
+              broadcast({
+                type: 'PV_MEDIA_PROBE_EVENT',
+                action: 'PLAYBACK_RESOURCES_CAPTURED',
+                requestUrl: url,
+                requestBody: rawBody.slice(0, 2000),
+                responseBody: text.slice(0, 4000),
+                deviceTypeIdentifier: deviceType,
+                maxResolutionFromResponse: maxRes,
+                rawRepresentationsFromResponse: rawReps,
+              });
             }
           }).catch(() => {});
         }
@@ -204,7 +384,7 @@ import { PrimeObservedTrack, PrimeProbeEventPayload } from '../types/drm_researc
     };
   }
 
-  // 6. Inspect Player SDK instance
+  // 6. Inspect Player SDK instance + Deep API Scanner
   function scanForPlayerInstance() {
     const candidates = [
       (window as any).atvwebplayersdk,
@@ -228,6 +408,44 @@ import { PrimeObservedTrack, PrimeProbeEventPayload } from '../types/drm_researc
           hasTrackSelectionApi: hasTrackApi,
           selectionApiName: hasTrackApi ? 'setVideoTrack/selectQuality' : undefined
         });
+
+        // ── NEW: Deep SDK API Scanner ──────────────────────────────────────────
+        const apiKeywords = [
+          'quality', 'resolution', 'track', 'bitrate', 'maxHeight', 'maxWidth',
+          'setMax', 'forceQuality', 'representation', 'stream', 'codec', 'abr',
+          'adaptation', 'bandwidth',
+        ];
+
+        function walkProps(obj: any, prefix: string, depth: number): string[] {
+          if (!obj || typeof obj !== 'object' || depth > 3) return [];
+          const found: string[] = [];
+          let ownKeys: string[] = [];
+          try { ownKeys = Object.getOwnPropertyNames(obj); } catch (_) {}
+          for (const key of ownKeys) {
+            const lower = key.toLowerCase();
+            if (apiKeywords.some((kw) => lower.includes(kw))) {
+              found.push(prefix ? `${prefix}.${key}` : key);
+            }
+            if (depth < 3) {
+              let child: any;
+              try { child = obj[key]; } catch (_) { continue; }
+              if (child && typeof child === 'object' && !Array.isArray(child)) {
+                found.push(...walkProps(child, prefix ? `${prefix}.${key}` : key, depth + 1));
+              }
+            }
+          }
+          return found;
+        }
+
+        const discoveredApis = walkProps(inst, '', 1);
+        if (discoveredApis.length > 0) {
+          broadcast({
+            type: 'PV_MEDIA_PROBE_EVENT',
+            action: 'SDK_API_DEEP_SCAN',
+            discoveredApis,
+          });
+        }
+
         return;
       }
     }

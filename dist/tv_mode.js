@@ -1500,11 +1500,209 @@
     }
   };
 
+  // src/prime/PrimeTVAbrController.ts
+  var DECISION_LOG_MAX = 20;
+  var TICK_INTERVAL_MS = 500;
+  var UPGRADE_BUFFER_THRESHOLD = 10;
+  var DOWNGRADE_BUFFER_THRESHOLD = 3;
+  var RECOVERY_COOLDOWN_MS = 8e3;
+  var PrimeTVAbrController = class {
+    video;
+    tracks = [];
+    sortedTracks = [];
+    // ascending height
+    tier = "startup";
+    selectedRepresentationId = null;
+    currentTrackIndex = 0;
+    // index into sortedTracks
+    downgradeTime = 0;
+    tickHandle = null;
+    decisionLog = [];
+    constructor(video) {
+      this.video = video;
+    }
+    /** Begins the 500 ms monitoring loop. */
+    start() {
+      if (this.tickHandle !== null) return;
+      this.tier = "startup";
+      this.tickHandle = setInterval(() => this.tick(), TICK_INTERVAL_MS);
+    }
+    /** Stops the monitoring loop. */
+    stop() {
+      if (this.tickHandle !== null) {
+        clearInterval(this.tickHandle);
+        this.tickHandle = null;
+      }
+    }
+    /** Returns the current ABR state tier. */
+    getCurrentTier() {
+      return this.tier;
+    }
+    /** Returns the id of the currently selected representation, or null if none. */
+    getSelectedRepresentationId() {
+      return this.selectedRepresentationId;
+    }
+    /**
+     * Called whenever new representations are observed from the manifest.
+     * Keeps sortedTracks updated (ascending by height for ladder indexing).
+     */
+    onRepresentationsUpdate(tracks) {
+      this.tracks = tracks;
+      this.sortedTracks = [...tracks].sort((a, b) => a.height - b.height);
+      if (this.tier === "startup" && this.sortedTracks.length > 0) {
+        this.currentTrackIndex = 0;
+        const startTrack = this.sortedTracks[0];
+        this.selectTrack(startTrack, "HOLD", startTrack.height, "Startup \u2014 seeding at lowest track", 0);
+      }
+    }
+    /** Returns the last (up to) 20 ABR decisions. */
+    getDecisionLog() {
+      return [...this.decisionLog];
+    }
+    // ─── Private ────────────────────────────────────────────────────────────────
+    /**
+     * Core ABR tick — runs every 500 ms.
+     * Computes bufferedAhead and decides whether to upgrade, downgrade, or hold.
+     */
+    tick() {
+      if (this.sortedTracks.length === 0) return;
+      const bufferedAhead = this.computeBufferedAhead();
+      const currentTrack = this.sortedTracks[this.currentTrackIndex];
+      if (bufferedAhead < DOWNGRADE_BUFFER_THRESHOLD) {
+        const lowerIndex = this.currentTrackIndex - 1;
+        if (lowerIndex >= 0) {
+          const lowerTrack = this.sortedTracks[lowerIndex];
+          this.recordDecision(
+            "DOWNGRADE",
+            currentTrack.height,
+            lowerTrack.height,
+            `Buffer critical (${bufferedAhead.toFixed(1)}s < ${DOWNGRADE_BUFFER_THRESHOLD}s) \u2014 emergency drop`,
+            bufferedAhead
+          );
+          this.currentTrackIndex = lowerIndex;
+          this.tier = "degraded";
+          this.downgradeTime = Date.now();
+          this.selectTrack(lowerTrack, "DOWNGRADE", currentTrack.height, `Buffer ${bufferedAhead.toFixed(1)}s`, bufferedAhead);
+        } else {
+          this.recordDecision(
+            "HOLD",
+            currentTrack.height,
+            currentTrack.height,
+            `At minimum quality, buffer still low (${bufferedAhead.toFixed(1)}s)`,
+            bufferedAhead
+          );
+          this.tier = "degraded";
+          this.downgradeTime = Date.now();
+        }
+        return;
+      }
+      if (this.tier === "degraded") {
+        if (Date.now() - this.downgradeTime >= RECOVERY_COOLDOWN_MS) {
+          this.tier = "recovering";
+          this.recordDecision(
+            "HOLD",
+            currentTrack.height,
+            currentTrack.height,
+            `Recovery cooldown elapsed \u2014 entering recovering state`,
+            bufferedAhead
+          );
+        } else {
+          this.recordDecision(
+            "HOLD",
+            currentTrack.height,
+            currentTrack.height,
+            `Degraded cooldown (${((Date.now() - this.downgradeTime) / 1e3).toFixed(1)}s / 8s)`,
+            bufferedAhead
+          );
+        }
+        return;
+      }
+      if (bufferedAhead > UPGRADE_BUFFER_THRESHOLD) {
+        const higherIndex = this.currentTrackIndex + 1;
+        if (higherIndex < this.sortedTracks.length) {
+          const higherTrack = this.sortedTracks[higherIndex];
+          this.currentTrackIndex = higherIndex;
+          this.tier = higherTrack.height >= 2160 ? "stable" : this.tier === "recovering" ? "stable" : "stable";
+          this.recordDecision(
+            "UPGRADE",
+            currentTrack.height,
+            higherTrack.height,
+            `Buffer healthy (${bufferedAhead.toFixed(1)}s > ${UPGRADE_BUFFER_THRESHOLD}s) \u2014 stepping up`,
+            bufferedAhead
+          );
+          this.selectTrack(higherTrack, "UPGRADE", currentTrack.height, `Buffer ${bufferedAhead.toFixed(1)}s`, bufferedAhead);
+          return;
+        } else {
+          this.tier = "stable";
+        }
+      }
+      const reason = this.tier === "recovering" ? `Recovering \u2014 buffer ${bufferedAhead.toFixed(1)}s not yet > ${UPGRADE_BUFFER_THRESHOLD}s` : `Steady \u2014 buffer ${bufferedAhead.toFixed(1)}s`;
+      this.recordDecision("HOLD", currentTrack.height, currentTrack.height, reason, bufferedAhead);
+      if (this.tier === "startup" && this.selectedRepresentationId !== null) {
+        this.tier = "stable";
+      }
+    }
+    /**
+     * Emits a track selection request via window.postMessage to prime_bridge
+     * and updates internal tracking state.
+     */
+    selectTrack(track, action, fromHeight, reason, bufferedAhead) {
+      this.selectedRepresentationId = track.id;
+      if (typeof window !== "undefined") {
+        window.postMessage(
+          {
+            target: "PV_PAGE_BRIDGE",
+            command: "SELECT_TRACK",
+            trackId: track.id,
+            source: "PrimeTVAbrController",
+            reason
+          },
+          "*"
+        );
+      }
+    }
+    /** Adds a decision to the circular log (capped at DECISION_LOG_MAX). */
+    recordDecision(action, fromHeight, toHeight, reason, bufferedAhead) {
+      const decision = {
+        timestamp: Date.now(),
+        action,
+        fromHeight,
+        toHeight,
+        reason,
+        bufferedAhead
+      };
+      this.decisionLog.push(decision);
+      if (this.decisionLog.length > DECISION_LOG_MAX) {
+        this.decisionLog.shift();
+      }
+    }
+    /**
+     * Computes how many seconds of video are buffered ahead of the current playhead.
+     * Returns 0 if unavailable.
+     */
+    computeBufferedAhead() {
+      try {
+        const buffered = this.video.buffered;
+        const currentTime = this.video.currentTime;
+        if (buffered.length === 0) return 0;
+        for (let i = buffered.length - 1; i >= 0; i--) {
+          if (currentTime >= buffered.start(i) && currentTime <= buffered.end(i)) {
+            return buffered.end(i) - currentTime;
+          }
+        }
+        return 0;
+      } catch {
+        return 0;
+      }
+    }
+  };
+
   // src/prime/PrimeQualityController.ts
   var PrimeQualityController = class {
     probe;
     adapter;
     debugPanel;
+    abrController = null;
     monitorInterval = null;
     isAttemptingSelection = false;
     selectionAttemptedForTrackId = null;
@@ -1515,6 +1713,11 @@
     }
     start() {
       if (this.monitorInterval) return;
+      const video = this.adapter.getVideoElement();
+      if (video && !this.abrController) {
+        this.abrController = new PrimeTVAbrController(video);
+        this.abrController.start();
+      }
       this.monitorInterval = setInterval(() => {
         this.evaluateAndVerify();
       }, 1e3);
@@ -1524,6 +1727,7 @@
         clearInterval(this.monitorInterval);
         this.monitorInterval = null;
       }
+      this.abrController?.stop();
       this.debugPanel.destroy();
     }
     toggleDebugPanel() {
@@ -1533,10 +1737,18 @@
       const video = this.adapter.getVideoElement();
       const width = video?.videoWidth || 0;
       const height = video?.videoHeight || 0;
+      if (video && !this.abrController) {
+        this.abrController = new PrimeTVAbrController(video);
+        this.abrController.start();
+      }
       const uhdStatus = this.probe.getUhdRepresentationStatus();
       const uhdHdrStatus = this.probe.getHdrUhdRepresentationStatus();
       const ladder = this.probe.getObservedLadderSummary();
       const maxTrack = this.probe.getMaxObservedRepresentation();
+      const allTracks = this.probe.getAllObservedRepresentations();
+      if (this.abrController && allTracks.length > 0) {
+        this.abrController.onRepresentationsUpdate(allTracks);
+      }
       const decoderReport = await TVCapabilityEngine.probeDecoderCapabilities();
       const chromeDecoderPass = decoderReport.supports2160p ? "PASS" : "FAIL";
       const emePass = typeof navigator !== "undefined" && typeof navigator.requestMediaKeySystemAccess === "function" ? "PASS" : "FAIL";
@@ -1576,6 +1788,8 @@
         finalStatus = "UHD_NOT_DELIVERED_TO_WEB_SESSION";
         exactReason = `Amazon Playback Service (GetPlaybackResources) withholds 4K/UHD streams from desktop browsers (Chrome Widevine L3 software CDM). Manifest delivery is capped at ${maxTrack ? `${maxTrack.height}p (${maxTrack.codec || "AVC"})` : "1080p"}. 4K UHD requires hardware-secure Widevine L1 / PlayReady SL3000 on certified TV devices with HDCP 2.2 hardware enforcement.`;
       }
+      const abrTier = this.abrController?.getCurrentTier() ?? "startup";
+      const abrDecisionLog = this.abrController?.getDecisionLog() ?? [];
       const panelData = {
         currentDecoded: width > 0 && height > 0 ? `${width} \xD7 ${height}` : "Idle / Buffering",
         currentCodec: maxTrack?.codec || (width > 0 ? "H.264 (avc1)" : "Scanning..."),
@@ -1590,7 +1804,9 @@
         playerUhdSelection,
         finalStatus,
         maxObservedRepresentation: maxTrack ? `${maxTrack.height}p` : "1080p",
-        exactReason
+        exactReason,
+        abrTier,
+        abrDecisionLog
       };
       this.debugPanel.render(panelData);
       return panelData;
@@ -1600,6 +1816,9 @@
     }
     getAdapter() {
       return this.adapter;
+    }
+    getAbrController() {
+      return this.abrController;
     }
   };
 
