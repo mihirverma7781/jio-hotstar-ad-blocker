@@ -328,6 +328,13 @@
         </details>
 
         <details class="faq-item">
+          <summary class="faq-question">Why does video appear black when screen sharing in Meet, Teams, or Zoom?</summary>
+          <div class="faq-answer">
+            <p>Protected commercial streams use Encrypted Media Extensions (EME) and hardware-level Digital Rights Management (Widevine/HDCP). The operating system and GPU driver intentionally prevent screen capture tools from reading protected video frames, which results in a black video plane while player controls remain visible. The extension's <strong>Presenter Mode</strong> ensures your shared browser tab stays clean and free of extraneous HUD badges or filter glitches during meetings.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
           <summary class="faq-question">Which browsers are supported?</summary>
           <div class="faq-answer">
             <p>Any Chromium-based browser supporting Manifest V3, including Google Chrome, Brave, Microsoft Edge, Opera, and Vivaldi.</p>

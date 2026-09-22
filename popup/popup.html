@@ -135,6 +135,32 @@
       </div>
     </div>
 
+    <!-- Screen Sharing & Presentation Mode -->
+    <div class="section-title">Screen Sharing & Presentation</div>
+    <div class="settings-list">
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Presenter Mode</span>
+          <span class="setting-desc">Suppresses HUD badges & visual filters during Meet/Teams shares</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="togglePresenterMode">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Educational DRM Screen Sharing Card -->
+    <div class="card info-card">
+      <div class="info-header">
+        <span class="info-icon">ℹ️</span>
+        <span class="info-title">Why Video Appears Black in Screen Shares</span>
+      </div>
+      <p class="info-text">
+        Hardware DRM (Widevine/HDCP) and OS secure surfaces intentionally mask protected video frames from capture tools (Google Meet, Teams, Zoom). This is enforced by your browser and GPU drivers to protect copyrighted media. Presenter Mode provides a clean, clutter-free tab for your meetings.
+      </p>
+    </div>
+
     <!-- Footer Actions -->
     <footer class="footer">
       <button id="btnResetStats" class="btn-secondary">Reset Stats</button>

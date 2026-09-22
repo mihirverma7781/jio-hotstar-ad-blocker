@@ -21,7 +21,8 @@
     autoSkipButtons: true,
     blurAdVideo: true,
     skipIntros: true,
-    removeWebappAds: true
+    removeWebappAds: true,
+    presenterMode: false
   };
 
   // State
@@ -195,6 +196,11 @@
 
   // HUD management
   function showHUD(speed) {
+    if (settings.presenterMode) {
+      hideHUD();
+      return;
+    }
+
     let hud = document.getElementById('jioad-hud');
     if (!hud) {
       hud = document.createElement('div');
@@ -253,7 +259,8 @@
           }
         }
 
-        if (settings.blurAdVideo) {
+        // Apply blur only if enabled and not in presenter/meeting mode
+        if (settings.blurAdVideo && !settings.presenterMode) {
           video.classList.add('jioad-video-blur');
         }
       } catch (e) {}

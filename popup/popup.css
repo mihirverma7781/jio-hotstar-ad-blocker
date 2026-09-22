@@ -354,3 +354,37 @@ input:checked + .slider:before {
 .btn-primary:hover {
   filter: brightness(1.1);
 }
+
+/* Informational Notice Card */
+.info-card {
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.info-icon {
+  font-size: 13px;
+}
+
+.info-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #93c5fd;
+  letter-spacing: 0.2px;
+}
+
+.info-text {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+

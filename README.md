@@ -84,7 +84,25 @@ Click the extension icon in your browser toolbar to customize:
 * **Blur / Dim Ad Video**: Toggle the visual veil effect.
 * **Skip Intros & Recaps**: Toggle auto-skipping of show intros and recaps.
 * **Block In-App Banners**: Toggle hiding of home feed billboard promos.
+* **Presenter Mode**: Suppresses on-screen HUD pills and blur transitions during screen-sharing sessions (e.g. Google Meet, MS Teams, Zoom) for a distraction-free presentation.
 * **Reset Stats**: Clear accumulated ads skipped and time saved counters.
+
+---
+
+## 🖥️ Screen Sharing & DRM Architecture (Technical Analysis)
+
+### Why Video Appears Black in Google Meet / Teams / Zoom
+When sharing a browser tab or window playing protected OTT content, viewers often see standard controls and subtitles, but the actual video area is rendered as a **solid black rectangle**.
+
+Here is the technical architectural explanation:
+1. **Encrypted Media Extensions (EME) & CDM**: Commercial video streams on Disney+ Hotstar are encrypted and delivered via EME to an OS/browser Content Decryption Module (such as Google Widevine L1/L3, Microsoft PlayReady, or Apple FairPlay).
+2. **Protected Media Path & Hardware Overlay**: The decrypted video frames are rendered directly into a hardware-protected presentation surface managed by the GPU driver and OS window server (Direct3D on Windows, Quartz/WindowServer on macOS).
+3. **Capture Prevention (HDCP / Secure Surfaces)**: When a screen-sharing application (Google Meet, Teams, Zoom, Slack) invokes browser display-capture APIs (`navigator.mediaDevices.getDisplayMedia`) or OS capture APIs, the operating system and GPU driver enforce content-protection flags. The hardware compositor intentionally masks the protected video surface with black pixels to prevent unauthorized interception of copyrighted streams.
+4. **DOM vs. Video Separation**: Standard HTML/CSS elements (player controls, menus, subtitles) are rendered by the browser's standard DOM rendering pipeline and remain visible during screen capture, while the DRM video layer underneath is blanked.
+
+### Extension Compliance & Presenter Mode
+* **Content Protection Integrity**: In accordance with browser security policies and digital rights management standards, this extension **does not** decrypt, tamper with, bypass, or circumvent DRM, EME, Widevine, PlayReady, FairPlay, or HDCP protections.
+* **Presenter / Meeting Mode**: When presenting or sharing your browser tab in meetings, enabling **Presenter Mode** ensures that the extension's HUD badges, ad veil filters, and promotional cleanup stay completely unobtrusive, providing a clean, professional window presentation.
 
 ---
 

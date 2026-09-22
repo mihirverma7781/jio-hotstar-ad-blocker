@@ -11,6 +11,8 @@ const DEFAULT_SETTINGS = {
   autoSkipButtons: true,
   blurAdVideo: true,
   skipIntros: true,
+  removeWebappAds: true,
+  presenterMode: false,
   adsSkipped: 0,
   secondsSaved: 0
 };
