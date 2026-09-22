@@ -1,16 +1,16 @@
 /**
- * JioHotstar Ad Skipper - Content Engine
- * Detects in-video ads (e.g. "Go Ads free", "Ad · 00:06", ad overlays),
- * accelerates playback to 16x, auto-mutes, instant-seeks, and auto-clicks skip buttons.
+ * JioHotstar Ad Skipper - Safe & Ultra-Fast Content Engine
+ * Detects in-video ads ("Go Ads free", "Ad · 00:xx"), accelerates playback (16x),
+ * auto-mutes, and auto-clicks skip buttons with zero page lag.
  */
 
 (function () {
   'use strict';
 
-  if (window.__jiohotstar_detector_loaded) return;
-  window.__jiohotstar_detector_loaded = true;
+  if (window.__jiohotstar_skipper_v2) return;
+  window.__jiohotstar_skipper_v2 = true;
 
-  console.log('[JioHotstar Ad Skipper] Content detector active.');
+  console.log('[JioHotstar Ad Skipper] Active and monitoring.');
 
   // Default configuration
   let settings = {
@@ -23,138 +23,104 @@
     skipIntros: true
   };
 
-  // State tracking
-  let isAdCurrentlyActive = false;
-  let previousPlaybackRate = 1.0;
+  // State
+  let isAdActive = false;
   let previousMuted = false;
+  let previousPlaybackRate = 1.0;
   let adStartTime = 0;
-  let consecutiveNonAdTicks = 0;
+  let nonAdCount = 0;
 
-  // Load initial settings from chrome.storage
+  // Load settings
   chrome.storage.local.get(null, (stored) => {
     if (stored) {
       settings = { ...settings, ...stored };
     }
   });
 
-  // Listen for settings updates
+  // Listen for settings changes
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === 'local') {
       for (const [key, change] of Object.entries(changes)) {
         settings[key] = change.newValue;
       }
-      if (!settings.enabled && isAdCurrentlyActive) {
-        exitAdMode();
+      if (!settings.enabled && isAdActive) {
+        restorePlayback();
       }
     }
   });
 
-  // Fallback: Inject main-world script if not already loaded via manifest
-  function injectMainWorldFallback() {
-    if (document.getElementById('jioad-main-script')) return;
-    try {
-      const script = document.createElement('script');
-      script.id = 'jioad-main-script';
-      script.src = chrome.runtime.getURL('content/injector.js');
-      script.onload = () => script.remove();
-      (document.head || document.documentElement).appendChild(script);
-    } catch (err) {}
-  }
-  injectMainWorldFallback();
+  // Fast ad detection regexes
+  const GO_ADS_FREE_REGEX = /go\s+ads?\s*free/i;
+  const AD_TIMER_REGEX = /^Ad\s*[·•:\-\s]\s*\d{1,2}:\d{2}/i;
+  const AD_SUBSTRING_REGEX = /\bAd\s*[·•:\-]\s*\d{1,2}:\d{2}\b/i;
+  const AD_COUNT_REGEX = /\bAd\s+\d+\s+of\s+\d+/i;
 
-  // Listen for background beacon messages
-  chrome.runtime.onMessage.addListener((message) => {
-    if (message.action === 'HOTSTAR_AD_BEACON') {
-      if (!settings.enabled) return;
-      console.log(`[JioHotstar Ad Skipper] Ad beacon ping: ${message.adName} (${message.durationSec}s)`);
-      enterAdMode(message.durationSec || 15);
-    }
-  });
-
-  // ==========================================
-  // In-Video Ad Detection Logic
-  // ==========================================
-
-  // Regular expressions to match Hotstar in-video ad cues
-  const AD_TEXT_REGEXES = [
-    /go\s+ads?\s*free/i,                    // Matches "Go Ads free", "Go Ad free" button
-    /^Ad\s*[·•:\-\s]\s*\d{1,2}:\d{2}/i,      // Matches "Ad · 00:06", "Ad • 00:15"
-    /\bAd\s*[·•:\-]\s*\d{1,2}:\d{2}\b/i,    // Substring match for ad timers
-    /\bAd\s+\d+\s+of\s+\d+/i,               // Matches "Ad 1 of 2"
-    /\bAd\s*:\s*\d+s?\b/i,                  // Matches "Ad : 15s"
-    /\bAd will end in\b/i,                  // Matches countdown label
-    /\bYour video will resume shortly\b/i,   // Matches resume label
-    /\bAdvertisement\b/i                    // Matches standalone badge
-  ];
-
-  function isAdDetectedInDOM() {
-    // 1. Scan leaf / near-leaf elements for explicit ad labels
-    const candidates = document.querySelectorAll(
-      'button, [role="button"], span, div, p, a, [data-testid*="ad"], [class*="ad-"], [class*="ad_"], [class*="adBadge"]'
-    );
-
-    for (let i = 0; i < candidates.length; i++) {
-      const el = candidates[i];
-      // Keep search ultra-fast: only inspect elements with few children or buttons
-      if (el.children.length <= 2 || el.tagName === 'BUTTON') {
+  // Scan visible DOM elements for Hotstar ad markers
+  function checkIsAdPlaying() {
+    // Look at buttons, spans, and leaf divs inside the document
+    const elements = document.querySelectorAll('button, [role="button"], span, div');
+    
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
+      // Only inspect elements that have 2 or fewer children (leaf text containers)
+      if (el.children.length <= 2) {
         const text = (el.textContent || '').trim();
         if (!text) continue;
 
-        for (let j = 0; j < AD_TEXT_REGEXES.length; j++) {
-          if (AD_TEXT_REGEXES[j].test(text)) {
-            return true;
-          }
+        // Check for "Go Ads free" (prominent Hotstar in-video ad button)
+        if (GO_ADS_FREE_REGEX.test(text)) {
+          return true;
+        }
+
+        // Check for "Ad · 00:06" / "Ad • 00:15"
+        if (AD_TIMER_REGEX.test(text) || AD_SUBSTRING_REGEX.test(text)) {
+          return true;
+        }
+
+        // Check for "Ad 1 of 2"
+        if (AD_COUNT_REGEX.test(text)) {
+          return true;
         }
       }
     }
 
-    // 2. Check for explicit aria-label or testid markers
-    const adMarked = document.querySelector(
-      '[aria-label*="advertisement" i], [data-testid*="ad-indicator"], [data-testid*="ad-badge"], .ad-tag, .adBadge'
-    );
-    if (adMarked && adMarked.offsetParent !== null) {
+    // Check for explicit ad testid or class markers if present
+    const adTag = document.querySelector('[data-testid*="ad-badge"], [data-testid*="ad-indicator"], .ad-tag, .adBadge');
+    if (adTag && adTag.offsetParent !== null) {
       return true;
     }
 
     return false;
   }
 
-  // ==========================================
-  // Auto-Click Skip Buttons
-  // ==========================================
-
+  // Auto-click Skip buttons
   function handleSkipButtons() {
     if (!settings.autoSkipButtons) return;
 
-    const skipPatterns = [
+    const skipRegexes = [
       /Skip\s*Ad/i,
       /Skip\s*Ads/i,
       /^Skip$/i
     ];
 
     if (settings.skipIntros) {
-      skipPatterns.push(/Skip\s*Intro/i, /Skip\s*Recap/i, /Skip\s*Credits/i);
+      skipRegexes.push(/Skip\s*Intro/i, /Skip\s*Recap/i, /Skip\s*Credits/i);
     }
 
-    const clickables = document.querySelectorAll(
-      'button, [role="button"], div[class*="skip" i], span[class*="skip" i], a[class*="skip" i], [data-testid*="skip" i]'
-    );
-
+    const clickables = document.querySelectorAll('button, [role="button"], div[class*="skip" i], span[class*="skip" i]');
     for (let i = 0; i < clickables.length; i++) {
       const el = clickables[i];
-      if (el.offsetParent === null) continue; // Hidden
+      if (el.offsetParent === null) continue; // Not visible
 
       const text = (el.innerText || el.textContent || '').trim();
-      // Explicitly protect "Go Ads free" from being clicked!
-      if (/go\s+ads?\s*free/i.test(text)) continue;
+      // NEVER click "Go Ads free"!
+      if (GO_ADS_FREE_REGEX.test(text)) continue;
 
-      for (let j = 0; j < skipPatterns.length; j++) {
-        if (skipPatterns[j].test(text) && text.length < 25) {
+      for (let j = 0; j < skipRegexes.length; j++) {
+        if (skipRegexes[j].test(text) && text.length < 25) {
           console.log('[JioHotstar Ad Skipper] Auto-clicking skip button:', text);
           try {
             el.click();
-            el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-            el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
             el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
           } catch (e) {}
           return;
@@ -163,11 +129,8 @@
     }
   }
 
-  // ==========================================
-  // Floating HUD Pill
-  // ==========================================
-
-  function showHUD() {
+  // HUD management
+  function showHUD(speed) {
     let hud = document.getElementById('jioad-hud');
     if (!hud) {
       hud = document.createElement('div');
@@ -175,18 +138,12 @@
       hud.innerHTML = `
         <span class="jioad-hud-icon">⚡</span>
         <span class="jioad-hud-text">Skipping Ad</span>
-        <span class="jioad-hud-badge" id="jioad-hud-speed">${settings.playbackSpeed}x</span>
+        <span class="jioad-hud-badge" id="jioad-hud-speed">${speed}x</span>
       `;
-      const playerContainer = document.getElementById('video-container') ||
-                              document.querySelector('[data-testid*="player"]') ||
-                              document.querySelector('.shaka-video-container') ||
-                              document.body;
-      if (playerContainer) {
-        playerContainer.appendChild(hud);
-      }
+      (document.body || document.documentElement).appendChild(hud);
     } else {
       const badge = document.getElementById('jioad-hud-speed');
-      if (badge) badge.textContent = `${settings.playbackSpeed}x`;
+      if (badge) badge.textContent = `${speed}x`;
       hud.style.display = 'flex';
     }
   }
@@ -196,87 +153,78 @@
     if (hud) hud.style.display = 'none';
   }
 
-  // ==========================================
-  // Execution: Enter & Exit Ad Mode
-  // ==========================================
-
-  function enterAdMode(estimatedDuration = 15) {
-    if (!settings.enabled) return;
-
+  // Apply acceleration & mute
+  function accelerateAd() {
     const videos = document.querySelectorAll('video');
     if (videos.length === 0) return;
 
-    if (!isAdCurrentlyActive) {
-      isAdCurrentlyActive = true;
-      adStartTime = Date.now();
-      consecutiveNonAdTicks = 0;
-
-      const primary = videos[0];
-      previousPlaybackRate = primary.playbackRate || 1.0;
-      previousMuted = primary.muted;
-
-      console.log(`[JioHotstar Ad Skipper] ⚡ In-video ad active! Accelerating (${settings.playbackSpeed}x) & muting.`);
-    }
-
     const targetSpeed = Number(settings.playbackSpeed) || 16.0;
 
-    // Apply speed, mute, and instant seek across all video elements
-    videos.forEach((v) => {
+    if (!isAdActive) {
+      isAdActive = true;
+      adStartTime = Date.now();
+      nonAdCount = 0;
+
+      // Remember initial state from first video
+      previousMuted = videos[0].muted;
+      previousPlaybackRate = videos[0].playbackRate <= 2 ? (videos[0].playbackRate || 1.0) : 1.0;
+
+      console.log(`[JioHotstar Ad Skipper] Ad detected! Accelerating to ${targetSpeed}x & muting.`);
+    }
+
+    videos.forEach((video) => {
       try {
-        if (settings.autoMute && !v.muted) {
-          v.muted = true;
-        }
-        if (v.playbackRate !== targetSpeed) {
-          v.playbackRate = targetSpeed;
-        }
-        if (settings.blurAdVideo) {
-          v.classList.add('jioad-video-blur');
+        // Auto-Mute
+        if (settings.autoMute && !video.muted) {
+          video.muted = true;
         }
 
-        // Instant Seek: If duration represents an ad segment (< 180s)
-        if (settings.instantSeek && v.duration && isFinite(v.duration) && v.duration > 0 && v.duration <= 180) {
-          if (v.currentTime < v.duration - 0.1) {
-            v.currentTime = v.duration;
+        // Fast forward
+        if (video.playbackRate !== targetSpeed) {
+          video.playbackRate = targetSpeed;
+        }
+
+        // Instant seek if short ad clip
+        if (settings.instantSeek && video.duration && isFinite(video.duration)) {
+          if (video.duration > 0 && video.duration <= 180) {
+            if (video.currentTime < video.duration - 0.1) {
+              video.currentTime = video.duration;
+            }
           }
         }
+
+        // Blur ad video
+        if (settings.blurAdVideo) {
+          video.classList.add('jioad-video-blur');
+        }
       } catch (e) {}
     });
 
-    // Notify main world script
-    document.documentElement.setAttribute('data-jioad-active', 'true');
-    window.dispatchEvent(new CustomEvent('jioad-speed-override', {
-      detail: { active: true, speed: targetSpeed, seek: settings.instantSeek }
-    }));
-
-    showHUD();
+    showHUD(targetSpeed);
   }
 
-  function exitAdMode() {
-    if (!isAdCurrentlyActive) return;
-    isAdCurrentlyActive = false;
-    consecutiveNonAdTicks = 0;
+  // Restore normal playback
+  function restorePlayback() {
+    if (!isAdActive) return;
+    isAdActive = false;
+    nonAdCount = 0;
 
-    console.log('[JioHotstar Ad Skipper] Ad ended. Restoring normal playback.');
+    console.log('[JioHotstar Ad Skipper] Ad ended. Restoring original speed and volume.');
 
     const videos = document.querySelectorAll('video');
-    videos.forEach((v) => {
+    videos.forEach((video) => {
       try {
-        v.playbackRate = previousPlaybackRate || 1.0;
+        video.playbackRate = previousPlaybackRate || 1.0;
         if (settings.autoMute) {
-          v.muted = previousMuted;
+          video.muted = previousMuted;
         }
-        v.classList.remove('jioad-video-blur');
+        video.classList.remove('jioad-video-blur');
       } catch (e) {}
     });
-
-    document.documentElement.removeAttribute('data-jioad-active');
-    window.dispatchEvent(new CustomEvent('jioad-speed-override', {
-      detail: { active: false, speed: 1.0 }
-    }));
 
     hideHUD();
 
-    // Report saved time to stats
+    // Track saved time
     const elapsed = Math.max(1, Math.round((Date.now() - adStartTime) / 1000));
     chrome.runtime.sendMessage({
       action: 'AD_SKIPPED',
@@ -284,46 +232,25 @@
     }).catch(() => {});
   }
 
-  // ==========================================
-  // Continuous Monitor Loop
-  // ==========================================
-
-  function tick() {
+  // Safe periodic monitor loop (every 250ms)
+  // Low CPU usage, zero interference with Widevine DRM or player streaming
+  setInterval(() => {
     if (!settings.enabled) return;
 
     handleSkipButtons();
 
-    const adDetected = isAdDetectedInDOM();
+    const adDetected = checkIsAdPlaying();
 
     if (adDetected) {
-      consecutiveNonAdTicks = 0;
-      enterAdMode();
-    } else if (isAdCurrentlyActive) {
-      // Require 3 consecutive clean ticks before exiting to prevent flickering
-      consecutiveNonAdTicks++;
-      if (consecutiveNonAdTicks >= 3) {
-        exitAdMode();
+      nonAdCount = 0;
+      accelerateAd();
+    } else if (isAdActive) {
+      // Require 2 consecutive clean checks to ensure ad is genuinely finished
+      nonAdCount++;
+      if (nonAdCount >= 2) {
+        restorePlayback();
       }
     }
-  }
-
-  // High-frequency poll (every 120ms)
-  setInterval(tick, 120);
-
-  // MutationObserver for instant DOM updates
-  const observer = new MutationObserver(() => {
-    if (settings.enabled) {
-      handleSkipButtons();
-      if (isAdDetectedInDOM()) {
-        consecutiveNonAdTicks = 0;
-        enterAdMode();
-      }
-    }
-  });
-
-  observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true
-  });
+  }, 250);
 
 })();

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "JioHotstar Ad Skipper & Blocker",
-  "version": "1.1.0",
-  "description": "Automatically fast-forwards (16x), auto-mutes, neutralizes VMAP mid-rolls, and skips in-video ads on JioHotstar and JioCinema.",
+  "version": "1.2.0",
+  "description": "Automatically fast-forwards (16x), auto-mutes, and skips in-video ads on JioHotstar and JioCinema with zero lag.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -22,7 +22,6 @@
   "permissions": [
     "storage",
     "declarativeNetRequest",
-    "webRequest",
     "tabs"
   ],
   "host_permissions": [
@@ -40,29 +39,9 @@
         "*://*.jiocinema.com/*",
         "*://*.jiostar.com/*"
       ],
-      "js": ["content/injector.js"],
-      "world": "MAIN",
-      "run_at": "document_start"
-    },
-    {
-      "matches": [
-        "*://*.hotstar.com/*",
-        "*://*.jiocinema.com/*",
-        "*://*.jiostar.com/*"
-      ],
       "js": ["content/detector.js"],
       "css": ["content/styles.css"],
-      "run_at": "document_start"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["content/injector.js"],
-      "matches": [
-        "*://*.hotstar.com/*",
-        "*://*.jiocinema.com/*",
-        "*://*.jiostar.com/*"
-      ]
+      "run_at": "document_idle"
     }
   ],
   "declarative_net_request": {
