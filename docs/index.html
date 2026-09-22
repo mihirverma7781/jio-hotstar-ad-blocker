@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JioHotstar Ad Skipper & Blocker ⚡ Zero Ads. Pure Streaming.</title>
+  <meta name="description" content="Lightweight Chrome extension that fast-forwards in-video ads at 16x speed, auto-mutes commercials, and removes banner ads on JioHotstar and JioCinema.">
+  <link rel="icon" type="image/png" href="icons/icon32.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Ambient Background Glows -->
+  <div class="ambient-glow glow-top"></div>
+  <div class="ambient-glow glow-middle"></div>
+
+  <!-- Header Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="nav-brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-name">JioHotstar<span class="gradient-text">Skipper</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#interactive-demo">Live Demo</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#installation">Installation</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="nav-actions">
+        <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker" target="_blank" class="btn btn-github">
+          <svg class="github-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </svg>
+          <span>Star on GitHub</span>
+        </a>
+        <a href="#installation" class="btn btn-primary">Get Extension</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero-section">
+    <div class="container hero-container">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>v1.2.0 • 16x Fast-Forward • Widevine DRM Safe</span>
+      </div>
+
+      <h1 class="hero-title">
+        Stream JioHotstar.<br>
+        <span class="gradient-text">Zero Ads. Zero Delays.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        The ultra-lightweight Chrome extension that accelerates in-video ads to <strong>16x speed</strong>, automatically silences commercial audio, auto-clicks skip buttons, and removes homepage banners.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#installation" class="btn btn-hero-primary">
+          <span>Install Extension</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+        <a href="#interactive-demo" class="btn btn-hero-secondary">
+          <span>See Interactive Demo</span>
+          <span class="play-indicator">▶</span>
+        </a>
+      </div>
+
+      <!-- Hero Visual Showcase -->
+      <div class="hero-showcase">
+        <div class="hero-image-wrapper">
+          <img src="assets/hero.jpg" alt="JioHotstar Ad Skipper Cinema Experience" class="hero-img">
+          <div class="hero-hud-preview">
+            <span class="hud-lightning">⚡</span>
+            <span class="hud-text">Skipping Ad</span>
+            <span class="hud-badge">16x Max</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Interactive Simulation Section -->
+  <section id="interactive-demo" class="demo-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Interactive Simulation</span>
+        <h2 class="section-title">See How It Bypasses Ads in Real-Time</h2>
+        <p class="section-subtitle">Click the trigger button below to simulate how the extension handles unskippable Hotstar ads.</p>
+      </div>
+
+      <div class="demo-player-box">
+        <div class="demo-screen" id="demoScreen">
+          <!-- Content State -->
+          <div class="demo-video-content" id="demoContent">
+            <div class="demo-movie-badge">🎬 Zack Snyder's Justice League</div>
+            <div class="demo-audio-bars" id="demoAudioBars">
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            </div>
+          </div>
+
+          <!-- Ad Overlay State (Hidden by default) -->
+          <div class="demo-ad-layer" id="demoAdLayer">
+            <div class="demo-ad-badge" id="demoAdBadge">Ad · 00:15</div>
+            <div class="demo-go-free-btn">Go Ads free</div>
+            <div class="demo-hud" id="demoHud">⚡ Skipping Ad (16x)</div>
+            <button class="demo-skip-btn" id="demoSkipBtn">Skip Ad ❯</button>
+          </div>
+
+          <!-- Timeline scrubber -->
+          <div class="demo-timeline">
+            <div class="demo-progress" id="demoProgress"></div>
+          </div>
+        </div>
+
+        <div class="demo-controls">
+          <button class="btn btn-demo-trigger" id="btnSimulateAd">
+            <span>⚡ Simulate Hotstar Ad Break</span>
+          </button>
+          <div class="demo-stats">
+            <div class="demo-stat">
+              <span class="demo-stat-label">Skipper Status:</span>
+              <span class="demo-stat-val val-green" id="demoStatus">Active & Watching</span>
+            </div>
+            <div class="demo-stat">
+              <span class="demo-stat-label">Playback Speed:</span>
+              <span class="demo-stat-val" id="demoSpeed">1.0x</span>
+            </div>
+            <div class="demo-stat">
+              <span class="demo-stat-label">Audio State:</span>
+              <span class="demo-stat-val" id="demoAudio">Unmuted 🔊</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Bento Grid -->
+  <section id="features" class="features-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Powerful Features</span>
+        <h2 class="section-title">Engineered for Seamless Entertainment</h2>
+        <p class="section-subtitle">Designed to eliminate every category of ad intrusion without breaking video streams or Widevine DRM.</p>
+      </div>
+
+      <div class="bento-grid">
+        <!-- Card 1: 16x Speed -->
+        <div class="bento-card bento-card-large">
+          <div class="bento-icon">⚡</div>
+          <h3>16x Hyper-Speed Acceleration</h3>
+          <p>The instant an in-video advertisement triggers, playback is accelerated to HTML5's maximum 16x speed. A grueling 30-second commercial finishes in approximately 1.8 seconds.</p>
+          <div class="bento-metric">
+            <span class="metric-num">~1.8s</span>
+            <span class="metric-sub">Average time spent per 30s ad</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Auto Mute -->
+        <div class="bento-card">
+          <div class="bento-icon">🔇</div>
+          <h3>Smart Auto-Mute & Restore</h3>
+          <p>Commercials are often mixed louder than content. The extension mutes audio the moment the ad begins and restores your previous volume the millisecond your show resumes.</p>
+        </div>
+
+        <!-- Card 3: In-App Banners -->
+        <div class="bento-card">
+          <div class="bento-icon">🚫</div>
+          <h3>Billboard & Banner Purge</h3>
+          <p>Wipes out invasive homepage billboard banners, masthead ads, and companion promo cards so your Hotstar interface stays clean and clutter-free.</p>
+        </div>
+
+        <!-- Card 4: Auto Clicker -->
+        <div class="bento-card">
+          <div class="bento-icon">⏩</div>
+          <h3>Auto-Click Skip Ad Buttons</h3>
+          <p>Monitors the player and automatically clicks "Skip Ad", "Skip Intro", and "Skip Recap" the instant they become clickable.</p>
+        </div>
+
+        <!-- Card 5: Widevine Safe -->
+        <div class="bento-card bento-card-large">
+          <div class="bento-icon">🛡️</div>
+          <h3>Widevine DRM & Manifest Safe</h3>
+          <p>Operates purely on HTML5 video elements without tampering with protected network chunks or DRM licenses. Zero buffering, zero playback errors, and zero "Page Unresponsive" crashes.</p>
+          <div class="bento-tags">
+            <span class="tag">Zero Buffering</span>
+            <span class="tag">No DRM Tampering</span>
+            <span class="tag">0% CPU Overhead</span>
+          </div>
+        </div>
+
+        <!-- Card 6: Privacy First -->
+        <div class="bento-card">
+          <div class="bento-icon">🔒</div>
+          <h3>100% Private & Open Source</h3>
+          <p>Runs entirely inside your browser. No telemetry, no external ad servers, no account required. All code is public on GitHub.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Extension Popup Showcase Section -->
+  <section class="showcase-section">
+    <div class="container showcase-container">
+      <div class="showcase-text">
+        <span class="section-tag">Customizable Control</span>
+        <h2>A Dashboard Tailored to Your Preference</h2>
+        <p>Fine-tune your streaming experience directly from the sleek dark-mode popup in your Chrome toolbar.</p>
+        <ul class="showcase-list">
+          <li><strong>Speed Multiplier:</strong> Switch between 16x (Fastest), 8x, or 4x playback.</li>
+          <li><strong>Audio Automation:</strong> Toggle auto-muting during commercial breaks.</li>
+          <li><strong>Visual Screen Veil:</strong> Apply a subtle blur and dim filter during ads.</li>
+          <li><strong>Live Counters:</strong> Monitor real-time counts of total ads skipped and time saved.</li>
+        </ul>
+      </div>
+      <div class="showcase-image-wrapper">
+        <img src="assets/control-panel.jpg" alt="Extension Control Panel Preview" class="showcase-img">
+      </div>
+    </div>
+  </section>
+
+  <!-- Installation Steps -->
+  <section id="installation" class="install-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Quick Start</span>
+        <h2 class="section-title">Install in Under 60 Seconds</h2>
+        <p class="section-subtitle">Compatible with Google Chrome, Brave, Microsoft Edge, Opera, and Vivaldi.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">01</div>
+          <h3>Download Codebase</h3>
+          <p>Clone the repository or download the ZIP from GitHub and extract it to your computer.</p>
+          <div class="code-box">
+            <code>git clone https://github.com/mihirverma7781/jio-hotstar-ad-blocker.git</code>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">02</div>
+          <h3>Open Extension Manager</h3>
+          <p>Navigate to <code>chrome://extensions</code> in your browser URL bar and toggle <strong>Developer mode</strong> in the top-right corner.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">03</div>
+          <h3>Load Unpacked</h3>
+          <p>Click the <strong>Load unpacked</strong> button and select the extracted project folder. You're ready to stream ad-free!</p>
+        </div>
+      </div>
+
+      <div class="install-cta-box">
+        <h3>Ready for Uninterrupted Binge-Watching?</h3>
+        <p>Get the repository and experience true ad-free streaming on Hotstar.</p>
+        <div class="cta-buttons">
+          <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker/archive/refs/heads/main.zip" class="btn btn-primary btn-large">
+            <span>Download ZIP (.zip)</span>
+          </a>
+          <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker" target="_blank" class="btn btn-secondary btn-large">
+            <span>View Source on GitHub ↗</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supported Platforms -->
+  <section class="platforms-section">
+    <div class="container text-center">
+      <span class="section-tag">Compatibility</span>
+      <h2>Supported Platforms & Browsers</h2>
+      <div class="platforms-list">
+        <div class="platform-item">
+          <span class="platform-name">Disney+ Hotstar</span>
+          <span class="platform-domain">hotstar.com</span>
+        </div>
+        <div class="platform-item">
+          <span class="platform-name">JioCinema</span>
+          <span class="platform-domain">jiocinema.com</span>
+        </div>
+        <div class="platform-item">
+          <span class="platform-name">JioStar</span>
+          <span class="platform-domain">jiostar.com</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="faq-section">
+    <div class="container faq-container">
+      <div class="section-header">
+        <span class="section-tag">Got Questions?</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary class="faq-question">How does 16x speed skipping work?</summary>
+          <div class="faq-answer">
+            <p>Hotstar uses server-guided and in-video ad streaming. When our detector recognizes the ad markers (such as the "Go Ads free" prompt or the countdown timer), it immediately applies HTML5's maximum native playback rate (16x) and silences audio. A standard 30-second commercial concludes in less than 2 seconds, and normal 1.0x playback resumes automatically.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">Does this tamper with Widevine DRM or cause buffering?</summary>
+          <div class="faq-answer">
+            <p>No. Unlike aggressive network interceptors that break encrypted streams or crash the player with "Page Unresponsive" errors, this extension operates purely as an HTML5 video controller in an isolated sandbox. It never touches DRM license keys or streaming chunks.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">Does it also remove homepage banners and billboard ads?</summary>
+          <div class="faq-answer">
+            <p>Yes. The extension includes cosmetic filtering and DeclarativeNetRequest rules that suppress top masthead billboards, video cards, companion ads, and subscription nudges.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">Which browsers are supported?</summary>
+          <div class="faq-answer">
+            <p>Any Chromium-based browser supporting Manifest V3, including Google Chrome, Brave, Microsoft Edge, Opera, and Vivaldi.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="footer-brand">
+        <div class="brand-logo">⚡ JioHotstar Skipper</div>
+        <p>The modern, open-source in-video ad blocker for JioHotstar and JioCinema.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker" target="_blank">GitHub Repository</a>
+        <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker/issues" target="_blank">Report Issue</a>
+        <a href="https://www.hotstar.com" target="_blank">Hotstar</a>
+      </div>
+    </div>
+    <div class="footer-bottom text-center">
+      <p>Released under the MIT License. Created for smooth, high-quality streaming.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
