@@ -22,7 +22,8 @@
   "permissions": [
     "storage",
     "declarativeNetRequest",
-    "tabs"
+    "tabs",
+    "alarms"
   ],
   "commands": {
     "_execute_action": {
