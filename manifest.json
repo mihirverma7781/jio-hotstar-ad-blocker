@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "JioHotstar Ad Skipper & Blocker",
-  "version": "1.2.0",
-  "description": "Automatically fast-forwards (16x), auto-mutes, and skips in-video ads on JioHotstar and JioCinema with zero lag.",
+  "name": "JioHotstar & Prime Video Ad Skipper",
+  "version": "1.3.0",
+  "description": "Automatically fast-forwards (16x), auto-mutes, and skips in-video ads on JioHotstar, JioCinema, and Amazon Prime Video.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -17,7 +17,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "JioHotstar Ad Skipper"
+    "default_title": "JioHotstar & Prime Video Ad Skipper"
   },
   "permissions": [
     "storage",
@@ -27,7 +27,18 @@
   "host_permissions": [
     "*://*.hotstar.com/*",
     "*://*.jiocinema.com/*",
-    "*://*.jiostar.com/*"
+    "*://*.jiostar.com/*",
+    "*://*.primevideo.com/*",
+    "*://*.amazon.com/*",
+    "*://*.amazon.in/*",
+    "*://*.amazon.co.uk/*",
+    "*://*.amazon.de/*",
+    "*://*.amazon.co.jp/*",
+    "*://*.amazon.fr/*",
+    "*://*.amazon.es/*",
+    "*://*.amazon.it/*",
+    "*://*.amazon.ca/*",
+    "*://*.amazon.com.au/*"
   ],
   "background": {
     "service_worker": "background/service_worker.js"
@@ -37,7 +48,18 @@
       "matches": [
         "*://*.hotstar.com/*",
         "*://*.jiocinema.com/*",
-        "*://*.jiostar.com/*"
+        "*://*.jiostar.com/*",
+        "*://*.primevideo.com/*",
+        "*://*.amazon.com/*",
+        "*://*.amazon.in/*",
+        "*://*.amazon.co.uk/*",
+        "*://*.amazon.de/*",
+        "*://*.amazon.co.jp/*",
+        "*://*.amazon.fr/*",
+        "*://*.amazon.es/*",
+        "*://*.amazon.it/*",
+        "*://*.amazon.ca/*",
+        "*://*.amazon.com.au/*"
       ],
       "js": ["content/detector.js"],
       "css": ["content/styles.css"],

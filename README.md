@@ -1,4 +1,4 @@
-# JioHotstar Ad Skipper & Blocker ⚡
+# JioHotstar & Amazon Prime Video Ad Skipper ⚡
 
 [![Live Website](https://img.shields.io/badge/Live_Website-mihirverma7781.github.io-3b82f6?style=for-the-badge&logo=googlechrome&logoColor=white)](https://mihirverma7781.github.io/jio-hotstar-ad-blocker/)
 [![GitHub stars](https://img.shields.io/github/stars/mihirverma7781/jio-hotstar-ad-blocker?style=for-the-badge&color=f59e0b)](https://github.com/mihirverma7781/jio-hotstar-ad-blocker/stargazers)
@@ -6,15 +6,15 @@
 
 > 🌐 **Official Website & Interactive Simulator**: [https://mihirverma7781.github.io/jio-hotstar-ad-blocker/](https://mihirverma7781.github.io/jio-hotstar-ad-blocker/)
 
-A Chrome Extension (Manifest V3) designed to automatically fast-forward, mute, and skip in-video advertisements on **JioHotstar** (`hotstar.com`), **JioCinema** (`jiocinema.com`), and **JioStar** (`jiostar.com`).
+A high-performance Chrome Extension (Manifest V3) designed to automatically fast-forward (16x), mute, and skip in-video advertisements on **JioHotstar** (`hotstar.com`), **JioCinema** (`jiocinema.com`), **JioStar** (`jiostar.com`), and **Amazon Prime Video** (`primevideo.com` / `amazon.com` / `amazon.in` / regional domains).
 
-Modeled after popular OTT ad-skippers (like *Ad Skipper for Prime Video*), this extension provides an uninterrupted, seamless viewing experience without breaking video playback streams.
+Provides an uninterrupted, seamless viewing experience across streaming giants without breaking video playback streams or tampering with DRM.
 
 ---
 
 <p align="center">
   <a href="https://mihirverma7781.github.io/jio-hotstar-ad-blocker/">
-    <img src="assets/hero.jpg" alt="JioHotstar Ad Skipper Cinema Experience" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);" />
+    <img src="assets/hero.jpg" alt="JioHotstar & Prime Video Ad Skipper Cinema Experience" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);" />
   </a>
 </p>
 
@@ -23,8 +23,8 @@ Modeled after popular OTT ad-skippers (like *Ad Skipper for Prime Video*), this 
 ## 🌐 Landing Website & Live Demo
 
 Visit the [Live Project Website](https://mihirverma7781.github.io/jio-hotstar-ad-blocker/) to explore:
-* **Interactive Ad Bypass Simulator**: Test how the extension detects ad cues, silences audio, and accelerates through commercials at 16x speed.
-* **Feature Breakdown**: Detailed look at the multi-layered in-video speedup and cosmetic banner purge.
+* **Interactive Ad Bypass Simulator**: Test how the extension detects ad cues, silences audio, and accelerates through commercials at 16x speed on both Hotstar and Prime Video.
+* **Feature Breakdown**: Detailed look at multi-platform in-video speedup and cosmetic banner purge.
 * **Visual Previews**: Screenshots of the extension popup dashboard and cinema mode HUD.
 
 ---
@@ -33,7 +33,7 @@ Visit the [Live Project Website](https://mihirverma7781.github.io/jio-hotstar-ad
 
 * **⚡ Ultra-Fast Playback (up to 16x)**: When an in-video advertisement is detected, playback speed is instantly accelerated to 16x, compressing 30-second ad breaks down to less than 2 seconds.
 * **🔇 Auto-Mute & Volume Restore**: Silences ad audio automatically while active, and cleanly restores your previous listening volume once your show or movie resumes.
-* **⏩ Auto-Click "Skip Ad" Buttons**: Instantly detects and clicks "Skip Ad", "Skip", "Skip Intro", and "Skip Recap" buttons the exact millisecond they become clickable.
+* **⏩ Auto-Click "Skip Ad" Buttons**: Instantly detects and clicks "Skip Ad", "Skip", "Skip Intro", and "Skip Recap" buttons across Hotstar and Prime Video the exact millisecond they appear.
 * **🎯 Instant Seek**: Attempts to seek directly to the end of seekable pre-roll and mid-roll ad segments.
 * **🚫 In-Webapp Banner & Billboard Purge**: Removes invasive homepage billboard ads, companion promo cards, and subscription nudges for a clean interface.
 * **🕶️ Blur / Dim Screen Veil**: Minimizes disruptive, loud visual ads by applying a subtle blur veil with an unobtrusive *"Skipping Ad ⚡"* HUD indicator.
@@ -44,11 +44,10 @@ Visit the [Live Project Website](https://mihirverma7781.github.io/jio-hotstar-ad
 
 ## 🛠️ How It Works (Safe, Zero-Freeze Architecture)
 
-1. **Pure Isolated Content Script (`content/detector.js`)**: Runs in Chrome's safe isolated sandbox with zero risk of interfering with Widevine DRM or encrypted DASH streaming chunks. Uses a lightweight 250ms scanner consuming near 0% CPU.
-2. **Accurate In-Video Ad Detection**: Directly detects Hotstar's in-video cues:
-   * `"Go Ads free"` button
-   * `"Ad · 00:xx"` / `Ad • mm:ss` countdown timer
-   * `Ad 1 of 2`
+1. **Pure Isolated Content Script (`content/detector.js`)**: Runs in Chrome's safe isolated sandbox with zero risk of interfering with Widevine DRM or encrypted DASH/HLS streaming chunks. Uses a lightweight 250ms scanner consuming near 0% CPU.
+2. **Multi-Platform Ad Detection**:
+   * **JioHotstar**: `"Go Ads free"` button, `"Ad · 00:xx"` / `Ad • mm:ss` countdown timer, `Ad 1 of 2`.
+   * **Amazon Prime Video**: `"Ad 1:08 Learn more"` overlay, countdown timers (`Ad 0:56`), ad timer indicators (`.atvwebplayersdk-ad-timer`, `[class*="adMarker"]`, `[class*="adOverlay"]`), and Prime Video skip triggers (`.atvwebplayersdk-skipelement-button`, `.fu4a6eb`).
 3. **Multi-Video Acceleration**: Automatically targets and speeds up all active `<video>` elements to 16x speed and mutes loud commercial audio.
 4. **Cosmetic & Network Filtering (`rules/ad_rules.json` & `content/styles.css`)**: Suppresses external telemetry (Scorecard, Conviva, Pubmatic, etc.) and hides cosmetic ad banners.
 

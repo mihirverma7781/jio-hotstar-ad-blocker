@@ -1,14 +1,12 @@
 /**
  * JioHotstar Ad Skipper & Blocker - Visual & Cosmetic Styles
  * Handles in-video ad veil, HUD indicator, and complete removal of in-webapp ads.
- * Highly optimized for smooth 60fps screen sharing without GPU compositor lag.
  */
 
-/* High-performance ad veil (uses GPU-accelerated opacity & brightness instead of expensive blur convolution) */
+/* Blurred & dimmed ad video transition during video ads */
 .jioad-video-blur {
-  opacity: 0.15 !important;
-  filter: brightness(0.2) !important;
-  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  filter: blur(28px) brightness(0.25) !important;
+  transition: filter 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
   pointer-events: none !important;
 }
 
@@ -22,15 +20,18 @@
   align-items: center;
   gap: 10px;
   padding: 10px 18px;
-  background: rgba(15, 23, 42, 0.92);
+  background: rgba(15, 23, 42, 0.85);
   border: 1px solid rgba(59, 130, 246, 0.4);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(59, 130, 246, 0.3);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-radius: 9999px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #f8fafc;
   font-size: 13px;
   font-weight: 600;
   pointer-events: none;
+  animation: jioad-pulse 1.8s infinite ease-in-out;
   user-select: none;
 }
 
@@ -61,12 +62,24 @@
   letter-spacing: 0.5px;
 }
 
+@keyframes jioad-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 10px 30px -3px rgba(0, 0, 0, 0.7), 0 0 25px rgba(59, 130, 246, 0.5);
+  }
+}
+
 /* ================================================================
  * IN-WEBAPP AD BLOCKING & COSMETIC FILTERING
- * Pure CSS declarative rules - 0 CPU overhead, 0 layout reflows.
+ * Suppresses billboards, promotional banners, companion cards,
+ * sidebar upgrade nudges, and Google/Jio ad slots.
  * ================================================================ */
 
-/* 1. Hotstar Billboards, Companion Cards & Banners */
+/* 1. Hotstar Billboards & Video/Image Banner Cards */
 div[data-testid="bbtype-video"],
 div[data-testid="bbtype-image"],
 [data-testid*="billboard"],
@@ -77,14 +90,54 @@ div[data-testid="bbtype-image"],
 [data-testid*="cte-"],
 [class*="billboard" i],
 [class*="companionCard" i],
-[class*="breakoutAd" i],
+[class*="breakoutAd" i] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 2. Hotstar Ad CDN Assets (hesads.akamaized.net) & Containers */
 img[src*="hesads.akamaized.net"],
 video[src*="hesads.akamaized.net"],
+div:has(> img[src*="hesads.akamaized.net"]),
+div:has(> video[src*="hesads.akamaized.net"]),
+div:has(> * > img[src*="hesads.akamaized.net"]),
+div:has(> * > video[src*="hesads.akamaized.net"]) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  opacity: 0 !important;
+}
+
+/* 3. Collapse parent tray wrappers holding billboard ads */
+div:has(> div[data-testid*="bbtype"]),
+div:has(> [data-testid*="billboard"]),
+div:has(> [class*="billboard" i]) {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 4. Sidebar Upgrade Pill & Subscription Upsell Prompts */
 a[href*="/subscribe"],
 a[href*="/payment"],
 [data-testid*="upgrade"],
 [class*="upgrade-button" i],
 [class*="upgradeBtn" i],
+div:has(> a[href*="/subscribe"]) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* 5. Generic Ad Banner Containers across Hotstar and JioCinema */
 [class*="adBanner" i],
 [class*="ad-banner" i],
 [class*="banner-ad" i],
@@ -101,5 +154,4 @@ iframe[src*="/ads/" i] {
   visibility: hidden !important;
   height: 0 !important;
   opacity: 0 !important;
-  pointer-events: none !important;
 }
