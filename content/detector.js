@@ -1,16 +1,16 @@
 /**
- * JioHotstar Ad Skipper - Safe & Ultra-Fast Content Engine
- * Detects in-video ads ("Go Ads free", "Ad · 00:xx"), accelerates playback (16x),
- * auto-mutes, auto-clicks skip buttons, and removes in-webapp promo banners & billboard ads.
+ * JioHotstar & Amazon Prime Video Ad Skipper - Safe & Ultra-Fast Content Engine
+ * Detects in-video ads, accelerates playback (16x), auto-mutes,
+ * auto-clicks skip buttons, and removes in-webapp promo banners.
  */
 
 (function () {
   'use strict';
 
-  if (window.__jiohotstar_skipper_v2) return;
-  window.__jiohotstar_skipper_v2 = true;
+  if (window.__stream_skipper_v3) return;
+  window.__stream_skipper_v3 = true;
 
-  console.log('[JioHotstar & Prime Video Skipper] Active and monitoring.');
+  console.log('[Stream Skipper] Active and monitoring.');
 
   // Default configuration
   let settings = {
@@ -32,6 +32,10 @@
   let adStartTime = 0;
   let nonAdCount = 0;
 
+  // Platform detection
+  const isAmazon = /amazon\.|primevideo\./i.test(window.location.hostname);
+  const isHotstar = /hotstar\.|jiocinema\.|jiostar\./i.test(window.location.hostname);
+
   // Load settings
   chrome.storage.local.get(null, (stored) => {
     if (stored) {
@@ -51,117 +55,144 @@
     }
   });
 
-  // Fast in-video ad detection regexes for JioHotstar & Amazon Prime Video
+  // Precise in-video ad detection regexes
   const GO_ADS_FREE_REGEX = /go\s+ads?\s*free/i;
-  const AD_TIMER_REGEX = /^Ad\s*[·•:\-\s]\s*\d{1,2}:\d{2}/i;
-  const AD_SUBSTRING_REGEX = /\bAd\s*[·•:\-]?\s*\d{1,2}:\d{2}\b/i;
-  const PRIME_AD_REGEX = /\bAd\s+\d{1,2}:\d{2}\b/i;
-  const PRIME_LEARN_MORE_REGEX = /\bAd\b[\s\S]{0,50}\bLearn\s+more\b/i;
+  const HOTSTAR_AD_TIMER_REGEX = /^Ad\s*[·•:\-\s]\s*\d{1,2}:\d{2}/i;
+  const PRIME_AD_TIMER_REGEX = /\bAd\s+\d{1,2}:\d{2}\b/i;
+  const PRIME_LEARN_MORE_REGEX = /\bAd\b[\s\S]{0,40}\bLearn\s+more\b/i;
   const AD_COUNT_REGEX = /\bAd\s+\d+\s+of\s+\d+/i;
 
-  // Scan visible DOM elements for Hotstar & Prime Video in-video ad markers
+  // Locate the active player container
+  function getPlayerContainer() {
+    if (document.fullscreenElement) {
+      return document.fullscreenElement;
+    }
+
+    if (isAmazon) {
+      const amazonPlayer = document.querySelector(
+        '.webPlayerSDKContainer, #dv-web-player, .dv-player-container, .fpqiyer, .rendererContainer'
+      );
+      if (amazonPlayer) return amazonPlayer;
+    }
+
+    if (isHotstar) {
+      const hotstarPlayer = document.querySelector(
+        '[data-testid*="player"], .watch-container, [class*="player-container"]'
+      );
+      if (hotstarPlayer) return hotstarPlayer;
+    }
+
+    const video = document.querySelector('video');
+    if (video) {
+      return video.closest('[class*="player"], [id*="player"]') || video.parentElement?.parentElement || document.body;
+    }
+
+    return document.body;
+  }
+
+  // Scan for in-video ad markers strictly within the video player
   function checkIsAdPlaying() {
-    // 1. Direct Prime Video SDK ad markers & overlays
-    const primeAdMarkers = document.querySelectorAll(
-      '.atvwebplayersdk-ad-timer, .atvwebplayersdk-ad-label, .atvwebplayersdk-ad-container, [class*="adMarker" i], [class*="adOverlay" i], [class*="ad-overlay" i], [class*="ad-timer" i], [aria-label*="advertisement" i]'
-    );
-    for (let i = 0; i < primeAdMarkers.length; i++) {
-      const marker = primeAdMarkers[i];
-      if (marker.offsetParent !== null || marker.offsetWidth > 0 || marker.offsetHeight > 0) {
+    const videos = document.querySelectorAll('video');
+    if (videos.length === 0) return false;
+
+    // Make sure at least one video is loaded and not ended
+    let hasActiveVideo = false;
+    for (let i = 0; i < videos.length; i++) {
+      if (videos[i].readyState > 0 && !videos[i].ended) {
+        hasActiveVideo = true;
+        break;
+      }
+    }
+    if (!hasActiveVideo) return false;
+
+    const player = getPlayerContainer();
+
+    // 1. Amazon Prime Video checks (Text-only, strictly inside player container)
+    if (isAmazon) {
+      const candidates = player.querySelectorAll('div, span, p, a, button');
+      for (let i = 0; i < candidates.length; i++) {
+        const el = candidates[i];
+        // Only inspect leaf or small container elements
+        if (el.children.length <= 3) {
+          const text = (el.textContent || '').trim();
+          if (!text || text.length > 70) continue;
+
+          // Prime Video ad overlay patterns: "Ad 1:08 Learn more", "Ad 0:45", "Ad 1 of 2"
+          if (PRIME_LEARN_MORE_REGEX.test(text) || PRIME_AD_TIMER_REGEX.test(text) || AD_COUNT_REGEX.test(text)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    // 2. JioHotstar checks
+    if (isHotstar) {
+      // Hotstar explicit ad badge / indicator
+      const adTag = player.querySelector('[data-testid*="ad-badge"], [data-testid*="ad-indicator"], .ad-tag, .adBadge');
+      if (adTag && (adTag.offsetParent !== null || adTag.offsetWidth > 0)) {
         return true;
       }
-    }
 
-    // 2. Hotstar explicit ad testid or class markers
-    const hotstarAdTag = document.querySelector('[data-testid*="ad-badge"], [data-testid*="ad-indicator"], .ad-tag, .adBadge');
-    if (hotstarAdTag && (hotstarAdTag.offsetParent !== null || hotstarAdTag.offsetWidth > 0)) {
-      return true;
-    }
+      const candidates = player.querySelectorAll('button, [role="button"], span, div');
+      for (let i = 0; i < candidates.length; i++) {
+        const el = candidates[i];
+        if (el.children.length <= 3) {
+          const text = (el.textContent || '').trim();
+          if (!text || text.length > 70) continue;
 
-    // 3. Scan DOM elements for text markers (Hotstar "Go Ads free", "Ad · 00:06"; Prime Video "Ad 1:08 Learn more")
-    const elements = document.querySelectorAll('button, [role="button"], span, div, p, a');
-    for (let i = 0; i < elements.length; i++) {
-      const el = elements[i];
-      if (el.children.length <= 4) {
-        const text = (el.textContent || '').trim();
-        if (!text || text.length > 100) continue;
-
-        // Check for Hotstar "Go Ads free"
-        if (GO_ADS_FREE_REGEX.test(text)) {
-          return true;
-        }
-
-        // Check for Prime Video "Ad 1:08 Learn more" or "Ad ... Learn more"
-        if (PRIME_LEARN_MORE_REGEX.test(text)) {
-          return true;
-        }
-
-        // Check for "Ad · 00:06" / "Ad 1:08" / "Ad 0:56"
-        if (AD_TIMER_REGEX.test(text) || AD_SUBSTRING_REGEX.test(text) || PRIME_AD_REGEX.test(text)) {
-          return true;
-        }
-
-        // Check for "Ad 1 of 2"
-        if (AD_COUNT_REGEX.test(text)) {
-          return true;
+          // Hotstar patterns: "Go Ads free", "Ad · 00:15", "Ad 1 of 2"
+          if (GO_ADS_FREE_REGEX.test(text) || HOTSTAR_AD_TIMER_REGEX.test(text) || AD_COUNT_REGEX.test(text)) {
+            return true;
+          }
         }
       }
+      return false;
     }
 
     return false;
   }
 
-  // Auto-click Skip buttons (Hotstar & Prime Video)
+  // Auto-click Skip buttons safely without touching playback controls
   function handleSkipButtons() {
     if (!settings.autoSkipButtons) return;
 
-    const skipRegexes = [
-      /Skip\s*Ad/i,
-      /Skip\s*Ads/i,
-      /^Skip$/i
-    ];
+    const player = getPlayerContainer();
+    const clickables = player.querySelectorAll('button, [role="button"], div[class*="skip" i], a[role="button"]');
 
-    if (settings.skipIntros) {
-      skipRegexes.push(/Skip\s*Intro/i, /Skip\s*Recap/i, /Skip\s*Credits/i);
-    }
-
-    // 1. Prime Video SDK Skip buttons
-    const primeSkipButtons = document.querySelectorAll(
-      '.atvwebplayersdk-skipelement-button, [class*="skipelement" i], [class*="skipElement" i], .fu4a6eb, button[class*="skip" i]'
-    );
-    for (let i = 0; i < primeSkipButtons.length; i++) {
-      const btn = primeSkipButtons[i];
-      if (btn.offsetParent !== null || btn.offsetWidth > 0) {
-        const text = (btn.innerText || btn.textContent || '').trim();
-        if (GO_ADS_FREE_REGEX.test(text)) continue;
-        if (!settings.skipIntros && /Intro|Recap|Credits/i.test(text)) continue;
-
-        try {
-          btn.click();
-          btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-          return;
-        } catch (e) {}
-      }
-    }
-
-    // 2. General clickable elements across platforms
-    const clickables = document.querySelectorAll('button, [role="button"], div[class*="skip" i], span[class*="skip" i], a[role="button"]');
     for (let i = 0; i < clickables.length; i++) {
       const el = clickables[i];
       if (el.offsetParent === null && el.offsetWidth === 0) continue;
 
-      const text = (el.innerText || el.textContent || '').trim();
+      const text = (el.innerText || el.textContent || el.getAttribute('aria-label') || '').trim();
+      if (!text) continue;
+
+      // CRITICAL SAFETY CHECK: NEVER click forward 10s, backward, jump, or next episode!
+      if (/\b(10|15|30|forward|backward|jump|next|episode)\b/i.test(text)) {
+        continue;
+      }
+
       // NEVER click "Go Ads free"!
       if (GO_ADS_FREE_REGEX.test(text)) continue;
 
-      for (let j = 0; j < skipRegexes.length; j++) {
-        if (skipRegexes[j].test(text) && text.length < 30) {
-          try {
-            el.click();
-            el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-          } catch (e) {}
-          return;
-        }
+      // Strictly match Ad skip buttons
+      if (/^Skip\s*Ad[s]?$/i.test(text) || /^Skip$/i.test(text)) {
+        console.log('[Stream Skipper] Auto-clicking ad skip button:', text);
+        try {
+          el.click();
+          el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        } catch (e) {}
+        return;
+      }
+
+      // Strictly match Intro/Recap skip buttons if enabled
+      if (settings.skipIntros && /^(Skip\s*(Intro|Recap|Credits))$/i.test(text)) {
+        console.log('[Stream Skipper] Auto-clicking intro skip button:', text);
+        try {
+          el.click();
+          el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        } catch (e) {}
+        return;
       }
     }
   }
@@ -169,9 +200,8 @@
   // ==========================================
   // In-WebApp Ad & Promo Removal
   // ==========================================
-
   const WEBAPP_AD_SELECTORS = [
-    // Hotstar Billboards, Banners & Companion Ads
+    // Hotstar Billboards & Companion Ads
     'div[data-testid="bbtype-video"]',
     'div[data-testid="bbtype-image"]',
     '[data-testid*="billboard"]',
@@ -184,11 +214,9 @@
     '[class*="billboard" i]',
     '[class*="companionCard" i]',
     '[class*="breakoutAd" i]',
-    // Prime Video Promo / Upsell / Sponsored banners
+    // Prime Video Promo / Upsell banners
     '[data-testid*="banner-upsell"]',
     '[class*="pv-banner-upsell" i]',
-    '[class*="upsellBanner" i]',
-    '[class*="sponsored-banner" i]',
     // Sidebar Upgrade / Payment links
     'a[href*="/subscribe"]',
     'a[href*="/payment"]',
@@ -215,23 +243,17 @@
           el.style.setProperty('height', '0', 'important');
           el.style.setProperty('margin', '0', 'important');
           el.style.setProperty('padding', '0', 'important');
-
-          // If inside an isolated tray-wrapper, collapse the parent wrapper as well
-          const parentWrapper = el.closest('[id*="tray-wrapper"], [class*="trayWrapper"], [class*="widget_wrapper"]');
-          if (parentWrapper && parentWrapper.children.length <= 2) {
-            parentWrapper.style.setProperty('display', 'none', 'important');
-            parentWrapper.style.setProperty('height', '0', 'important');
-          }
         }
       }
     }
 
-    // Hide any element loading media from Hotstar's ad CDN
-    const adMedia = document.querySelectorAll('img[src*="hesads.akamaized.net"], video[src*="hesads.akamaized.net"]');
-    for (let i = 0; i < adMedia.length; i++) {
-      const card = adMedia[i].closest('div[class*="card"], div[class*="banner"], div[class*="widget"], div[data-testid]') || adMedia[i];
-      if (card && card.style.display !== 'none') {
-        card.style.setProperty('display', 'none', 'important');
+    if (isHotstar) {
+      const adMedia = document.querySelectorAll('img[src*="hesads.akamaized.net"], video[src*="hesads.akamaized.net"]');
+      for (let i = 0; i < adMedia.length; i++) {
+        const card = adMedia[i].closest('div[class*="card"], div[class*="banner"], div[class*="widget"], div[data-testid]') || adMedia[i];
+        if (card && card.style.display !== 'none') {
+          card.style.setProperty('display', 'none', 'important');
+        }
       }
     }
   }
@@ -297,8 +319,10 @@
           video.playbackRate = targetSpeed;
         }
 
-        if (settings.instantSeek && video.duration && isFinite(video.duration)) {
-          if (video.duration > 0 && video.duration <= 180) {
+        // Only instant-seek on platforms with standalone ad video clips (like Hotstar),
+        // and NEVER on Amazon Prime Video where ads are part of the stream timeline!
+        if (settings.instantSeek && !isAmazon) {
+          if (video.duration && isFinite(video.duration) && video.duration > 0 && video.duration <= 90) {
             if (video.currentTime < video.duration - 0.1) {
               video.currentTime = video.duration;
             }
@@ -362,8 +386,8 @@
     }
   }, 250);
 
-  // Periodic webapp banner cleaner (every 600ms)
-  setInterval(cleanWebappAds, 600);
+  // Periodic webapp banner cleaner (every 800ms)
+  setInterval(cleanWebappAds, 800);
   cleanWebappAds();
 
 })();
