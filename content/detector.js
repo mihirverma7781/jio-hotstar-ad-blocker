@@ -69,22 +69,21 @@
     }
 
     if (isAmazon) {
-      const amazonPlayer = document.querySelector(
-        '.webPlayerSDKContainer, #dv-web-player, .dv-player-container, .fpqiyer, .rendererContainer'
-      );
-      if (amazonPlayer) return amazonPlayer;
+      // Find the overarching Prime Video player wrapper that houses both the video and overlay layers
+      const amazonPlayer = document.getElementById('dv-web-player')
+        || document.querySelector('.webPlayerSDKContainer')
+        || document.querySelector('.dv-player-container')
+        || document.querySelector('.f1sf305u')?.parentElement?.parentElement
+        || document.querySelector('video')?.parentElement?.parentElement?.parentElement
+        || document.body;
+      return amazonPlayer;
     }
 
     if (isHotstar) {
       const hotstarPlayer = document.querySelector(
         '[data-testid*="player"], .watch-container, [class*="player-container"]'
-      );
-      if (hotstarPlayer) return hotstarPlayer;
-    }
-
-    const video = document.querySelector('video');
-    if (video) {
-      return video.closest('[class*="player"], [id*="player"]') || video.parentElement?.parentElement || document.body;
+      ) || document.querySelector('video')?.parentElement?.parentElement || document.body;
+      return hotstarPlayer;
     }
 
     return document.body;
@@ -95,30 +94,54 @@
     const videos = document.querySelectorAll('video');
     if (videos.length === 0) return false;
 
-    // Make sure at least one video is loaded and not ended
-    let hasActiveVideo = false;
-    for (let i = 0; i < videos.length; i++) {
-      if (videos[i].readyState > 0 && !videos[i].ended) {
-        hasActiveVideo = true;
-        break;
-      }
-    }
-    if (!hasActiveVideo) return false;
-
-    const player = getPlayerContainer();
-
-    // 1. Amazon Prime Video checks (Text-only, strictly inside player container)
+    // 1. Amazon Prime Video checks
     if (isAmazon) {
-      const candidates = player.querySelectorAll('div, span, p, a, button');
+      // Check A: Sibling layer of the transparent interaction overlay (.f1sf305u)
+      const interactionLayer = document.querySelector('.f1sf305u');
+      if (interactionLayer && interactionLayer.parentElement) {
+        const siblings = interactionLayer.parentElement.children;
+        for (let i = 0; i < siblings.length; i++) {
+          const sib = siblings[i];
+          if (sib !== interactionLayer) {
+            const sibText = (sib.textContent || '').trim();
+            if (sibText && (/Learn\s*more/i.test(sibText) || (/\bAd\b/i.test(sibText) && /\d{1,2}:\d{2}/.test(sibText)))) {
+              return true;
+            }
+          }
+        }
+      }
+
+      const player = getPlayerContainer();
+
+      // Check B: Dedicated Prime Video ad timer / label elements
+      const sdkAdTimer = player.querySelector('.atvwebplayersdk-ad-timer, .atvwebplayersdk-ad-label');
+      if (sdkAdTimer && sdkAdTimer.offsetParent !== null) {
+        const timerText = (sdkAdTimer.textContent || '').trim();
+        if (/\d{1,2}:\d{2}|\bAd\b/i.test(timerText)) {
+          return true;
+        }
+      }
+
+      // Check C: Text signatures inside the player container ("Learn more", "Ad 1:08", "Ad 1 of 2")
+      const candidates = player.querySelectorAll('button, a, [role="button"], span, div, p');
       for (let i = 0; i < candidates.length; i++) {
         const el = candidates[i];
-        // Only inspect leaf or small container elements
-        if (el.children.length <= 3) {
+        if (el.children.length <= 5) {
           const text = (el.textContent || '').trim();
-          if (!text || text.length > 70) continue;
+          if (!text || text.length > 80) continue;
 
-          // Prime Video ad overlay patterns: "Ad 1:08 Learn more", "Ad 0:45", "Ad 1 of 2"
-          if (PRIME_LEARN_MORE_REGEX.test(text) || PRIME_AD_TIMER_REGEX.test(text) || AD_COUNT_REGEX.test(text)) {
+          // "Learn more" is only displayed during ad breaks in Prime Video player
+          if (/^Learn\s*more$/i.test(text) || /\bAd\b[\s\S]{0,40}\bLearn\s*more\b/i.test(text)) {
+            return true;
+          }
+
+          // "Ad 1:08", "Ad 0:45", "Ad · 0:15", "Ad: 0:30"
+          if (/\bAd\b\s*[:·•\-\s]?\s*\d{1,2}:\d{2}\b/i.test(text)) {
+            return true;
+          }
+
+          // "Ad 1 of 2", "Ad 2 of 2"
+          if (/\bAd\s+\d+\s+of\s+\d+/i.test(text)) {
             return true;
           }
         }
@@ -128,6 +151,8 @@
 
     // 2. JioHotstar checks
     if (isHotstar) {
+      const player = getPlayerContainer();
+
       // Hotstar explicit ad badge / indicator
       const adTag = player.querySelector('[data-testid*="ad-badge"], [data-testid*="ad-indicator"], .ad-tag, .adBadge');
       if (adTag && (adTag.offsetParent !== null || adTag.offsetWidth > 0)) {
@@ -367,9 +392,32 @@
     }).catch(() => {});
   }
 
+  // Attach event listeners to clamp playback rate and muting if player script attempts to reset them during ad
+  function attachVideoListeners(video) {
+    if (video.__skipper_attached) return;
+    video.__skipper_attached = true;
+
+    video.addEventListener('ratechange', () => {
+      if (isAdActive && settings.enabled) {
+        const targetSpeed = Number(settings.playbackSpeed) || 16.0;
+        if (video.playbackRate !== targetSpeed) {
+          video.playbackRate = targetSpeed;
+        }
+      }
+    });
+
+    video.addEventListener('volumechange', () => {
+      if (isAdActive && settings.enabled && settings.autoMute && !video.muted) {
+        video.muted = true;
+      }
+    });
+  }
+
   // Periodic video ad monitor loop (every 250ms)
   setInterval(() => {
     if (!settings.enabled) return;
+
+    document.querySelectorAll('video').forEach(attachVideoListeners);
 
     handleSkipButtons();
 
