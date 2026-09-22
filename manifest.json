@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "JioHotstar & Prime Video Ad Skipper",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Automatically fast-forwards (16x), auto-mutes, and skips in-video ads on JioHotstar, JioCinema, and Amazon Prime Video.",
   "icons": {
     "16": "icons/icon16.png",
@@ -31,6 +31,13 @@
         "mac": "Alt+Shift+S"
       },
       "description": "Open JioHotstar & Prime Video Skipper"
+    },
+    "toggle_tv_hud": {
+      "suggested_key": {
+        "default": "Alt+Shift+D",
+        "mac": "Alt+Shift+D"
+      },
+      "description": "Toggle TV Mode Diagnostics HUD"
     }
   },
   "host_permissions": [
@@ -70,9 +77,15 @@
         "*://*.amazon.ca/*",
         "*://*.amazon.com.au/*"
       ],
-      "js": ["content/detector.js"],
+      "js": ["content/detector.js", "dist/tv_mode.js"],
       "css": ["content/styles.css"],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["lab/*", "dist/*", "assets/*"],
+      "matches": ["<all_urls>"]
     }
   ],
   "declarative_net_request": {

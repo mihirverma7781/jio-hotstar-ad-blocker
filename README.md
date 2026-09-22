@@ -84,24 +84,53 @@ Click the extension icon in your browser toolbar to customize:
 * **Skip Intros & Recaps**: Toggle auto-skipping of show intros and recaps.
 * **Block In-App Banners**: Toggle hiding of home feed billboard promos.
 * **Presenter Mode**: Suppresses on-screen HUD pills and blur transitions during screen-sharing sessions (e.g. Google Meet, MS Teams, Zoom) for a distraction-free presentation.
+* **TV Mode — UHD/HDR Playback Emulator**: Emulates the client-side media player behavior of modern 4K HDR smart TVs (UHD preference, HDR10 ranking, TV-style ABR, diagnostic HUD).
 * **Reset Stats**: Clear accumulated ads skipped and time saved counters.
 
 ---
 
-## 🖥️ Screen Sharing & DRM Architecture (Technical Analysis)
+## 📺 TV Mode — UHD/HDR Playback Emulator (Experimental Research)
 
-### Why Video Appears Black in Google Meet / Teams / Zoom
-When sharing a browser tab or window playing protected OTT content, viewers often see standard controls and subtitles, but the actual video area is rendered as a **solid black rectangle**.
+An experimental feature designed to reproduce, as closely as technically possible within Chromium, the **client-side media player behavior** of a modern 4K HDR streaming-TV application for authorized streams and testing media.
 
-Here is the technical architectural explanation:
-1. **Encrypted Media Extensions (EME) & CDM**: Commercial video streams on Disney+ Hotstar are encrypted and delivered via EME to an OS/browser Content Decryption Module (such as Google Widevine L1/L3, Microsoft PlayReady, or Apple FairPlay).
-2. **Protected Media Path & Hardware Overlay**: The decrypted video frames are rendered directly into a hardware-protected presentation surface managed by the GPU driver and OS window server (Direct3D on Windows, Quartz/WindowServer on macOS).
-3. **Capture Prevention (HDCP / Secure Surfaces)**: When a screen-sharing application (Google Meet, Teams, Zoom, Slack) invokes browser display-capture APIs (`navigator.mediaDevices.getDisplayMedia`) or OS capture APIs, the operating system and GPU driver enforce content-protection flags. The hardware compositor intentionally masks the protected video surface with black pixels to prevent unauthorized interception of copyrighted streams.
-4. **DOM vs. Video Separation**: Standard HTML/CSS elements (player controls, menus, subtitles) are rendered by the browser's standard DOM rendering pipeline and remain visible during screen capture, while the DRM video layer underneath is blanked.
+### 🎯 TV Player Behaviors Emulated
+1. **Resolution & Dynamic Range Hierarchy**: Automatically prioritizes representations following smart-TV preference order:
+   $$\text{2160p HDR} > \text{2160p SDR} > \text{1440p HDR} > \text{1440p SDR} > \text{1080p HDR} > \text{1080p SDR}$$
+2. **Codec Selection Matrix**: Evaluates codec compatibility via `navigator.mediaCapabilities.decodingInfo()` for HEVC (`hvc1`, `hev1`), AV1 (`av01`), VP9 Profile 2 (`vp09.02`), and AVC (`avc1`), preferring modern high-efficiency codecs with smooth, power-efficient decoding.
+3. **TV-Style Adaptive Bitrate (ABR)**:
+   * **Conservative TV Startup**: Begins on a stable tier (e.g., 1080p) to guarantee sub-second Time-To-First-Frame (TTFF) without buffering spinners.
+   * **Buffer-Aware Safety**: Aggressively monitors buffer length against a safety margin ($\ge 15\text{s}$) before stepping up to high-bitrate 4K tiers.
+   * **Fast Drop on Starvation**: Drops quality immediately upon buffer depletion ($< 5\text{s}$) to avoid rebuffering stalls.
+   * **Hold-Time Recovery**: Enforces a 15-second stability hold before allowing subsequent step-ups.
+4. **Hardware & Display Probing**: Queries OS/display wide-color-gamut (`display-p3`, `rec2020`), HDR capability (`video-dynamic-range: high`, `dynamic-range: high`), device pixel ratio (DPR), and screen resolution.
+5. **Real-Time Diagnostic HUD Overlay**: Press **`Alt + Shift + D`** (or invoke via extension commands) to toggle an on-screen TV diagnostic overlay displaying:
+   * Resolution & Frame Rate
+   * Video & Audio Codec
+   * Current & Target Bitrate
+   * Buffer Health & Safety Margin
+   * Color Space & HDR Status (`HDR10`, `HLG`, `DolbyVision`, `SDR`)
+   * Dropped Frames & Decode Stalls
+   * Bottleneck Diagnosis
+6. **Service Analysis Bottleneck Classifier**:
+   When 4K/HDR cannot be selected, TV Mode classifies the exact root cause:
+   * `SERVICE_OFFER`: The streaming manifest or service tier does not offer UHD/HDR representations to browser clients.
+   * `BROWSER_CAPABILITY`: The browser/OS decoder does not support the required codec/profile (e.g., HEVC Main 10).
+   * `DISPLAY_LIMITATION`: The attached monitor does not support high dynamic range or wide gamut.
+   * `NETWORK_CONSTRAINT`: Measured throughput is insufficient for high-bitrate 4K streams.
+   * `BUFFER_HEALTH`: Playback buffer is depleted or unstable.
+   * `HDCP_LIMITATION`: Output protection requirements are not satisfied.
+   * `DRM_RESTRICTION`: The content is restricted to certified hardware DRM security levels.
 
-### Extension Compliance & Presenter Mode
-* **Content Protection Integrity**: In accordance with browser security policies and digital rights management standards, this extension **does not** decrypt, tamper with, bypass, or circumvent DRM, EME, Widevine, PlayReady, FairPlay, or HDCP protections.
-* **Presenter / Meeting Mode**: When presenting or sharing your browser tab in meetings, enabling **Presenter Mode** ensures that the extension's HUD badges, ad veil filters, and promotional cleanup stay completely unobtrusive, providing a clean, professional window presentation.
+### 🧪 TV Playback Lab
+An interactive test bench is included directly inside the extension (`lab/index.html`). Launch it from the extension popup or navigate to `chrome-extension://<id>/lab/index.html`.
+* Test live authentic HLS and DASH manifests (Big Buck Bunny 4K, Tears of Steel 4K, Sintel 4K, Cosmos Laundromat).
+* Test preset TV profiles: **TV 4K HDR**, **TV 4K SDR**, **TV 1080p HDR**, **TV 1080p SDR**, and **Low-Bandwidth TV**.
+* Live visual representation list, playback metrics, and ABR state engine.
+
+### ⚖️ Strict Compliance Boundary (Player Emulation vs TV Device Authorization)
+* **What TV Mode does**: Emulates the player-side track selection, ABR adaptation, display query heuristics, and telemetry of a television app.
+* **What TV Mode DOES NOT do**: Does **NOT** impersonate certified television hardware, forge device certificates, spoof DRM robustness levels, extract DRM keys, alter license responses, forge license requests, disable EME, or bypass HDCP.
+* When commercial streaming services withhold 4K/HDR streams behind certified hardware EME/DRM requirements, TV Mode accurately reports this as a `SERVICE_OFFER` or `DRM_RESTRICTION` bottleneck rather than attempting forbidden spoofing.
 
 ---
 
@@ -113,23 +142,58 @@ jio-hotstar-ad-blocker/
 ├── style.css                  # Landing page dark glassmorphic styling
 ├── script.js                  # Interactive ad-bypass simulation player
 ├── assets/                    # Visual assets for GitHub Pages
-│   ├── hero.jpg               # Cinema screen preview graphic
-│   └── control-panel.jpg      # Extension popup preview mockup
 ├── docs/                      # GitHub Pages deployment mirror
-├── manifest.json              # Extension Manifest V3 configuration
+├── manifest.json              # Extension Manifest V3 configuration (v1.4.0)
 ├── background/
-│   └── service_worker.js     # Badge status & statistics manager
+│   └── service_worker.js     # Settings, badge status, & keyboard shortcuts
 ├── content/
 │   ├── detector.js           # Safe in-video ad detector & 16x speedup engine
-│   └── styles.css            # Ad veil & banner cleanup styles
+│   └── styles.css            # Ad veil & TV diagnostic HUD styles
 ├── popup/
-│   ├── popup.html            # Settings & dashboard popup
+│   ├── popup.html            # Settings, TV Mode controls, & dashboard popup
 │   ├── popup.js              # Popup controller logic
 │   └── popup.css             # Dark-theme glassmorphism styling
+├── lab/
+│   ├── index.html            # TV Playback Lab interactive test bench
+│   └── lab.css               # TV Playback Lab styling
 ├── rules/
 │   └── ad_rules.json         # Declarative Net Request rules
-├── icons/                    # Extension icons (16, 32, 48, 128 px)
+├── src/                      # TV Mode TypeScript Core Engine
+│   ├── types/tv_mode.ts      # Data contracts, models & interfaces
+│   ├── core/
+│   │   ├── TVCapabilityEngine.ts       # Display & decoder probing
+│   │   ├── TVHdrEngine.ts              # HDR state & format evaluation
+│   │   ├── TVRepresentationAnalyzer.ts # DASH MPD & HLS M3U8 parsing
+│   │   ├── TVQualitySelector.ts        # TV representation ranking & filtering
+│   │   ├── TVAdaptationController.ts   # TV-style ABR algorithm
+│   │   ├── TVMetrics.ts                # Telemetry & performance metrics
+│   │   ├── TVDiagnostics.ts            # HUD overlay & bottleneck classifier
+│   │   └── TVModeController.ts         # Full 10-step lifecycle coordinator
+│   ├── lab/                            # Lab application and sample manifests
+│   └── index.ts                        # Content script bootstrap entry point
+├── dist/                     # Compiled JavaScript bundles (tsup)
+│   ├── tv_mode.js            # Injected content script bundle
+│   └── lab_app.js            # Interactive TV Lab bundle
+├── test/                     # Vitest test suite (17 scenario verifications)
+├── package.json              # TypeScript, tsup, & Vitest toolchain
+├── tsconfig.json             # TypeScript compiler settings
 └── README.md                 # Project documentation
+```
+
+### 💻 Developer & Testing Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Run TypeScript typechecker
+npm run typecheck
+
+# Run automated Vitest test suite (unit + integration)
+npm test
+
+# Build production bundles with tsup
+npm run build
 ```
 
 ---

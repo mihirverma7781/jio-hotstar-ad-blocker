@@ -13,6 +13,10 @@ const DEFAULT_SETTINGS = {
   skipIntros: true,
   removeWebappAds: true,
   presenterMode: false,
+  tvModeEnabled: true,
+  tvPreferredQuality: '2160',
+  tvPreferHDR: true,
+  tvAdaptationStrategy: 'tv-balanced',
   adsSkipped: 0,
   secondsSaved: 0
 };
@@ -46,6 +50,10 @@ function initPopup() {
   const toggleSkipIntros = document.getElementById('toggleSkipIntros');
   const toggleRemoveWebappAds = document.getElementById('toggleRemoveWebappAds');
   const togglePresenterMode = document.getElementById('togglePresenterMode');
+  const toggleTvMode = document.getElementById('toggleTvMode');
+  const selTvQuality = document.getElementById('selTvQuality');
+  const toggleTvHdr = document.getElementById('toggleTvHdr');
+  const linkOpenLab = document.getElementById('linkOpenLab');
   const btnResetStats = document.getElementById('btnResetStats');
 
   function updateUI(settings) {
@@ -94,6 +102,9 @@ function initPopup() {
     if (toggleSkipIntros) toggleSkipIntros.checked = merged.skipIntros;
     if (toggleRemoveWebappAds) toggleRemoveWebappAds.checked = merged.removeWebappAds;
     if (togglePresenterMode) togglePresenterMode.checked = merged.presenterMode;
+    if (toggleTvMode) toggleTvMode.checked = merged.tvModeEnabled !== false;
+    if (selTvQuality) selTvQuality.value = String(merged.tvPreferredQuality || '2160');
+    if (toggleTvHdr) toggleTvHdr.checked = merged.tvPreferHDR !== false;
   }
 
   // Load initial settings
@@ -161,6 +172,32 @@ function initPopup() {
   if (togglePresenterMode) {
     togglePresenterMode.addEventListener('change', (e) => {
       chrome.storage.local.set({ presenterMode: e.target.checked });
+    });
+  }
+
+  // Bind TV Mode Settings
+  if (toggleTvMode) {
+    toggleTvMode.addEventListener('change', (e) => {
+      chrome.storage.local.set({ tvModeEnabled: e.target.checked });
+    });
+  }
+
+  if (selTvQuality) {
+    selTvQuality.addEventListener('change', (e) => {
+      chrome.storage.local.set({ tvPreferredQuality: e.target.value });
+    });
+  }
+
+  if (toggleTvHdr) {
+    toggleTvHdr.addEventListener('change', (e) => {
+      chrome.storage.local.set({ tvPreferHDR: e.target.checked });
+    });
+  }
+
+  if (linkOpenLab) {
+    linkOpenLab.addEventListener('click', (e) => {
+      e.preventDefault();
+      chrome.tabs.create({ url: chrome.runtime.getURL('lab/index.html') });
     });
   }
 

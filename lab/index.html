@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TV Mode — UHD/HDR Playback Lab</title>
+  <link rel="stylesheet" href="lab.css">
+  <link rel="stylesheet" href="../content/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="lab-app">
+    <!-- Header -->
+    <header class="lab-header">
+      <div class="brand">
+        <span class="tv-icon">📺</span>
+        <div>
+          <h1>TV Mode <span class="badge-tag">UHD / HDR Playback Emulator</span></h1>
+          <p class="subtitle">Research & Testing Laboratory for Client-Side Smart-TV Media Selection & ABR Behavior</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="btnToggleHud" class="btn btn-secondary">⚡ Toggle HUD (Alt+Shift+D)</button>
+        <button type="button" id="btnAnalyzeSession" class="btn btn-primary">🔍 Run Service Analysis</button>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="lab-grid">
+      <!-- Left Column: Video & Control -->
+      <section class="lab-player-section">
+        <div class="video-container" id="videoWrapper">
+          <video id="labVideo" controls playsinline poster="../assets/hero.jpg">
+            <!-- Source will be attached dynamically or played via canvas/test streams -->
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+          </video>
+        </div>
+
+        <!-- Interactive Control Bar -->
+        <div class="controls-panel card">
+          <div class="control-group">
+            <label for="selProfile">Simulated TV Profile:</label>
+            <select id="selProfile">
+              <option value="tv-4k-hdr">TV 4K HDR (2160p 60fps, HEVC/AV1/VP9)</option>
+              <option value="tv-4k-sdr">TV 4K SDR (2160p 60fps, AV1/VP9)</option>
+              <option value="tv-1080p-hdr">TV 1080p HDR (1080p 60fps, VP9/HEVC)</option>
+              <option value="tv-1080p-sdr">TV 1080p SDR (1080p 30fps, H.264)</option>
+              <option value="low-bandwidth-tv">Low-Bandwidth TV (720p 30fps)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="selManifest">Media Manifest:</label>
+            <select id="selManifest">
+              <option value="4k-hdr-hls">4K HDR HLS Master Playlist (HEVC/AV1/VP9/AVC)</option>
+              <option value="4k-hdr-dash">4K HDR DASH MPD (HEVC 10-bit + AV1)</option>
+              <option value="1080p-hls">1080p SDR Only HLS (Simulates Web Limitation)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Service Bottleneck Analysis Result Box -->
+        <div id="labAnalysisResult" class="analysis-container"></div>
+
+        <!-- Representations Table -->
+        <div class="card reps-card">
+          <h3>Exposed Stream Representations</h3>
+          <p class="card-desc">Authentic streams parsed from media manifest (no synthetic or fabricated tiers).</p>
+          <div class="table-wrapper">
+            <table class="reps-table">
+              <thead>
+                <tr>
+                  <th>Resolution</th>
+                  <th>Range</th>
+                  <th>Codec</th>
+                  <th>Bitrate</th>
+                  <th>Framerate</th>
+                  <th>ID</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="labRepsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Live Telemetry & Capabilities -->
+      <aside class="lab-sidebar">
+        <!-- Display Capabilities -->
+        <div class="card">
+          <div class="card-title-row">
+            <h3>Display Capabilities</h3>
+            <span class="indicator-live">Live</span>
+          </div>
+          <div id="labDisplayCaps" class="caps-box"></div>
+        </div>
+
+        <!-- Decoder Capabilities -->
+        <div class="card">
+          <div class="card-title-row">
+            <h3>Decoder & Codec Support</h3>
+            <span class="indicator-live">MediaCapabilities</span>
+          </div>
+          <div id="labDecoderCaps" class="caps-box"></div>
+        </div>
+
+        <!-- Real-Time Telemetry Metrics -->
+        <div class="card telemetry-card">
+          <div class="card-title-row">
+            <h3>TV Playback Telemetry</h3>
+            <span class="indicator-live">ABR</span>
+          </div>
+          <div id="labMetricsBox" class="metrics-grid"></div>
+        </div>
+
+        <!-- Compliance & Security Assurance Card -->
+        <div class="card compliance-card">
+          <div class="compliance-header">
+            <span class="shield-icon">🛡️</span>
+            <strong>Research & Compliance Boundary</strong>
+          </div>
+          <p class="compliance-text">
+            This laboratory tests client-side media selection algorithms, display compatibility, and ABR behavior. It reproduces player behavior, not device authorization: it never bypasses HDCP, tampers with DRM/EME licenses, or spoofs certified device credentials.
+          </p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="../dist/lab_app.js"></script>
+</body>
+</html>

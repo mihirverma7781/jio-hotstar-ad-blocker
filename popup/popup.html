@@ -135,6 +135,52 @@
       </div>
     </div>
 
+    <!-- TV Mode — UHD/HDR Playback Emulator Section -->
+    <div class="section-title">TV Mode — UHD/HDR Playback</div>
+    <div class="settings-list">
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">TV Mode Emulator</span>
+          <span class="setting-desc">Emulates 4K HDR Smart-TV selection & ABR</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleTvMode" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Target Resolution</span>
+          <span class="setting-desc">Prefers UHD when exposed & decodable</span>
+        </div>
+        <select id="selTvQuality" class="popup-select">
+          <option value="2160">4K UHD (2160p)</option>
+          <option value="1440">QHD (1440p)</option>
+          <option value="1080">FHD (1080p)</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">Prefer HDR</span>
+          <span class="setting-desc">Prioritizes HDR10 on capable displays</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleTvHdr" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-title">TV Playback Lab</span>
+          <span class="setting-desc">Interactive test bench for DASH/HLS</span>
+        </div>
+        <a href="../lab/index.html" id="linkOpenLab" class="btn-lab-launch">Open Lab ↗</a>
+      </div>
+    </div>
+
     <!-- Screen Sharing & Presentation Mode -->
     <div class="section-title">Screen Sharing & Presentation</div>
     <div class="settings-list">

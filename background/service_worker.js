@@ -13,6 +13,10 @@ const DEFAULT_SETTINGS = {
   skipIntros: true,
   removeWebappAds: true,
   presenterMode: false,
+  tvModeEnabled: true,
+  tvPreferredQuality: '2160',
+  tvPreferHDR: true,
+  tvAdaptationStrategy: 'tv-balanced',
   adsSkipped: 0,
   secondsSaved: 0
 };
@@ -53,6 +57,17 @@ function updateBadge(isEnabled) {
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes.enabled) {
     updateBadge(changes.enabled.newValue);
+  }
+});
+
+// Listen for keyboard commands
+chrome.commands.onCommand.addListener((command) => {
+  if (command === 'toggle_tv_hud') {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'TOGGLE_TV_HUD' }).catch(() => {});
+      }
+    });
   }
 });
 

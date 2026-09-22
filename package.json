@@ -1,0 +1,23 @@
+{
+  "name": "jio-hotstar-ad-blocker",
+  "version": "1.4.0",
+  "description": "JioHotstar & Prime Video Ad Skipper with experimental TV Mode UHD/HDR Playback Emulator",
+  "main": "dist/tv_mode.js",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": ["chrome-extension", "tv-mode", "uhd", "hdr", "ad-skipper"],
+  "author": "mihirverma7781 <mihirv7781@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.0.287",
+    "@types/node": "^20.17.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}
