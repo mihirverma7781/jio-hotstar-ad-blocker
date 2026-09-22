@@ -1,8 +1,31 @@
 # JioHotstar Ad Skipper & Blocker ⚡
 
+[![Live Website](https://img.shields.io/badge/Live_Website-mihirverma7781.github.io-3b82f6?style=for-the-badge&logo=googlechrome&logoColor=white)](https://mihirverma7781.github.io/jio-hotstar-ad-blocker/)
+[![GitHub stars](https://img.shields.io/github/stars/mihirverma7781/jio-hotstar-ad-blocker?style=for-the-badge&color=f59e0b)](https://github.com/mihirverma7781/jio-hotstar-ad-blocker/stargazers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](LICENSE)
+
+> 🌐 **Official Website & Interactive Simulator**: [https://mihirverma7781.github.io/jio-hotstar-ad-blocker/](https://mihirverma7781.github.io/jio-hotstar-ad-blocker/)
+
 A Chrome Extension (Manifest V3) designed to automatically fast-forward, mute, and skip in-video advertisements on **JioHotstar** (`hotstar.com`), **JioCinema** (`jiocinema.com`), and **JioStar** (`jiostar.com`).
 
 Modeled after popular OTT ad-skippers (like *Ad Skipper for Prime Video*), this extension provides an uninterrupted, seamless viewing experience without breaking video playback streams.
+
+---
+
+<p align="center">
+  <a href="https://mihirverma7781.github.io/jio-hotstar-ad-blocker/">
+    <img src="assets/hero.jpg" alt="JioHotstar Ad Skipper Cinema Experience" width="100%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);" />
+  </a>
+</p>
+
+---
+
+## 🌐 Landing Website & Live Demo
+
+Visit the [Live Project Website](https://mihirverma7781.github.io/jio-hotstar-ad-blocker/) to explore:
+* **Interactive Ad Bypass Simulator**: Test how the extension detects ad cues, silences audio, and accelerates through commercials at 16x speed.
+* **Feature Breakdown**: Detailed look at the multi-layered in-video speedup and cosmetic banner purge.
+* **Visual Previews**: Screenshots of the extension popup dashboard and cinema mode HUD.
 
 ---
 
