@@ -1,16 +1,16 @@
 /**
- * JioHotstar Ad Skipper - Visual Styles
- * Blur filters, HUD badge, and banner cleaner.
+ * JioHotstar Ad Skipper & Blocker - Visual & Cosmetic Styles
+ * Handles in-video ad veil, HUD indicator, and complete removal of in-webapp ads.
  */
 
-/* Blurred & dimmed ad video transition */
+/* Blurred & dimmed ad video transition during video ads */
 .jioad-video-blur {
   filter: blur(28px) brightness(0.25) !important;
   transition: filter 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
   pointer-events: none !important;
 }
 
-/* Floating Ad Skipping HUD Pill */
+/* Floating In-Video Ad Skipping HUD Pill */
 #jioad-hud {
   position: absolute;
   top: 24px;
@@ -73,14 +73,83 @@
   }
 }
 
-/* Hide static banner ad containers across Hotstar and JioCinema */
-[class*="adBanner"],
-[class*="ad-banner"],
-[class*="banner-ad"],
-[class*="masthead-ad"],
-[data-testid*="ad-banner"],
-[id*="ad-slot"],
-[id*="gpt-ad"] {
+/* ================================================================
+ * IN-WEBAPP AD BLOCKING & COSMETIC FILTERING
+ * Suppresses billboards, promotional banners, companion cards,
+ * sidebar upgrade nudges, and Google/Jio ad slots.
+ * ================================================================ */
+
+/* 1. Hotstar Billboards & Video/Image Banner Cards */
+div[data-testid="bbtype-video"],
+div[data-testid="bbtype-image"],
+[data-testid*="billboard"],
+[data-testid*="bbtype"],
+[data-testid*="breakout"],
+[data-testid*="leadgen"],
+[data-testid*="companion"],
+[data-testid*="cte-"],
+[class*="billboard" i],
+[class*="companionCard" i],
+[class*="breakoutAd" i] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 2. Hotstar Ad CDN Assets (hesads.akamaized.net) & Containers */
+img[src*="hesads.akamaized.net"],
+video[src*="hesads.akamaized.net"],
+div:has(> img[src*="hesads.akamaized.net"]),
+div:has(> video[src*="hesads.akamaized.net"]),
+div:has(> * > img[src*="hesads.akamaized.net"]),
+div:has(> * > video[src*="hesads.akamaized.net"]) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  opacity: 0 !important;
+}
+
+/* 3. Collapse parent tray wrappers holding billboard ads */
+div:has(> div[data-testid*="bbtype"]),
+div:has(> [data-testid*="billboard"]),
+div:has(> [class*="billboard" i]) {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 4. Sidebar Upgrade Pill & Subscription Upsell Prompts */
+a[href*="/subscribe"],
+a[href*="/payment"],
+[data-testid*="upgrade"],
+[class*="upgrade-button" i],
+[class*="upgradeBtn" i],
+div:has(> a[href*="/subscribe"]) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* 5. Generic Ad Banner Containers across Hotstar and JioCinema */
+[class*="adBanner" i],
+[class*="ad-banner" i],
+[class*="banner-ad" i],
+[class*="masthead-ad" i],
+[data-testid*="ad-banner" i],
+[id*="google_ads" i],
+[id*="gpt-ad" i],
+[id*="gam-ad" i],
+[id*="ad-slot" i],
+iframe[src*="doubleclick" i],
+iframe[src*="jioads" i],
+iframe[src*="/ads/" i] {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;

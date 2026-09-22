@@ -1,7 +1,7 @@
 /**
  * JioHotstar Ad Skipper - Safe & Ultra-Fast Content Engine
  * Detects in-video ads ("Go Ads free", "Ad · 00:xx"), accelerates playback (16x),
- * auto-mutes, and auto-clicks skip buttons with zero page lag.
+ * auto-mutes, auto-clicks skip buttons, and removes in-webapp promo banners & billboard ads.
  */
 
 (function () {
@@ -20,7 +20,8 @@
     autoMute: true,
     autoSkipButtons: true,
     blurAdVideo: true,
-    skipIntros: true
+    skipIntros: true,
+    removeWebappAds: true
   };
 
   // State
@@ -49,25 +50,23 @@
     }
   });
 
-  // Fast ad detection regexes
+  // Fast in-video ad detection regexes
   const GO_ADS_FREE_REGEX = /go\s+ads?\s*free/i;
   const AD_TIMER_REGEX = /^Ad\s*[·•:\-\s]\s*\d{1,2}:\d{2}/i;
   const AD_SUBSTRING_REGEX = /\bAd\s*[·•:\-]\s*\d{1,2}:\d{2}\b/i;
   const AD_COUNT_REGEX = /\bAd\s+\d+\s+of\s+\d+/i;
 
-  // Scan visible DOM elements for Hotstar ad markers
+  // Scan visible DOM elements for Hotstar in-video ad markers
   function checkIsAdPlaying() {
-    // Look at buttons, spans, and leaf divs inside the document
     const elements = document.querySelectorAll('button, [role="button"], span, div');
     
     for (let i = 0; i < elements.length; i++) {
       const el = elements[i];
-      // Only inspect elements that have 2 or fewer children (leaf text containers)
       if (el.children.length <= 2) {
         const text = (el.textContent || '').trim();
         if (!text) continue;
 
-        // Check for "Go Ads free" (prominent Hotstar in-video ad button)
+        // Check for "Go Ads free"
         if (GO_ADS_FREE_REGEX.test(text)) {
           return true;
         }
@@ -110,7 +109,7 @@
     const clickables = document.querySelectorAll('button, [role="button"], div[class*="skip" i], span[class*="skip" i]');
     for (let i = 0; i < clickables.length; i++) {
       const el = clickables[i];
-      if (el.offsetParent === null) continue; // Not visible
+      if (el.offsetParent === null) continue;
 
       const text = (el.innerText || el.textContent || '').trim();
       // NEVER click "Go Ads free"!
@@ -125,6 +124,71 @@
           } catch (e) {}
           return;
         }
+      }
+    }
+  }
+
+  // ==========================================
+  // In-WebApp Ad & Promo Removal
+  // ==========================================
+
+  const WEBAPP_AD_SELECTORS = [
+    // Hotstar Billboards, Banners & Companion Ads
+    'div[data-testid="bbtype-video"]',
+    'div[data-testid="bbtype-image"]',
+    '[data-testid*="billboard"]',
+    '[data-testid*="bbtype"]',
+    '[data-testid*="companion"]',
+    '[data-testid*="breakout"]',
+    '[data-testid*="leadgen"]',
+    '[data-testid*="cte-"]',
+    '[data-testid*="ad-banner"]',
+    '[class*="billboard" i]',
+    '[class*="companionCard" i]',
+    '[class*="breakoutAd" i]',
+    // Sidebar Upgrade / Payment links
+    'a[href*="/subscribe"]',
+    'a[href*="/payment"]',
+    '[data-testid*="upgrade"]',
+    // Generic Ad slots
+    '[id*="google_ads" i]',
+    '[id*="gpt-ad" i]',
+    '[id*="gam-ad" i]',
+    '[id*="ad-slot" i]',
+    'iframe[src*="doubleclick" i]',
+    'iframe[src*="jioads" i]'
+  ];
+
+  function cleanWebappAds() {
+    if (!settings.enabled || !settings.removeWebappAds) return;
+
+    for (let i = 0; i < WEBAPP_AD_SELECTORS.length; i++) {
+      const ads = document.querySelectorAll(WEBAPP_AD_SELECTORS[i]);
+      for (let j = 0; j < ads.length; j++) {
+        const el = ads[j];
+        if (el && el.style.display !== 'none') {
+          el.style.setProperty('display', 'none', 'important');
+          el.style.setProperty('visibility', 'hidden', 'important');
+          el.style.setProperty('height', '0', 'important');
+          el.style.setProperty('margin', '0', 'important');
+          el.style.setProperty('padding', '0', 'important');
+
+          // If inside an isolated tray-wrapper, collapse the parent wrapper as well
+          const parentWrapper = el.closest('[id*="tray-wrapper"], [class*="trayWrapper"], [class*="widget_wrapper"]');
+          if (parentWrapper && parentWrapper.children.length <= 2) {
+            parentWrapper.style.setProperty('display', 'none', 'important');
+            parentWrapper.style.setProperty('height', '0', 'important');
+          }
+        }
+      }
+    }
+
+    // Hide any element loading media from Hotstar's ad CDN
+    const adMedia = document.querySelectorAll('img[src*="hesads.akamaized.net"], video[src*="hesads.akamaized.net"]');
+    for (let i = 0; i < adMedia.length; i++) {
+      const card = adMedia[i].closest('div[class*="card"], div[class*="banner"], div[class*="widget"], div[data-testid]') || adMedia[i];
+      if (card && card.style.display !== 'none') {
+        card.style.setProperty('display', 'none', 'important');
       }
     }
   }
@@ -165,7 +229,6 @@
       adStartTime = Date.now();
       nonAdCount = 0;
 
-      // Remember initial state from first video
       previousMuted = videos[0].muted;
       previousPlaybackRate = videos[0].playbackRate <= 2 ? (videos[0].playbackRate || 1.0) : 1.0;
 
@@ -174,17 +237,14 @@
 
     videos.forEach((video) => {
       try {
-        // Auto-Mute
         if (settings.autoMute && !video.muted) {
           video.muted = true;
         }
 
-        // Fast forward
         if (video.playbackRate !== targetSpeed) {
           video.playbackRate = targetSpeed;
         }
 
-        // Instant seek if short ad clip
         if (settings.instantSeek && video.duration && isFinite(video.duration)) {
           if (video.duration > 0 && video.duration <= 180) {
             if (video.currentTime < video.duration - 0.1) {
@@ -193,7 +253,6 @@
           }
         }
 
-        // Blur ad video
         if (settings.blurAdVideo) {
           video.classList.add('jioad-video-blur');
         }
@@ -224,7 +283,6 @@
 
     hideHUD();
 
-    // Track saved time
     const elapsed = Math.max(1, Math.round((Date.now() - adStartTime) / 1000));
     chrome.runtime.sendMessage({
       action: 'AD_SKIPPED',
@@ -232,8 +290,7 @@
     }).catch(() => {});
   }
 
-  // Safe periodic monitor loop (every 250ms)
-  // Low CPU usage, zero interference with Widevine DRM or player streaming
+  // Periodic video ad monitor loop (every 250ms)
   setInterval(() => {
     if (!settings.enabled) return;
 
@@ -245,12 +302,15 @@
       nonAdCount = 0;
       accelerateAd();
     } else if (isAdActive) {
-      // Require 2 consecutive clean checks to ensure ad is genuinely finished
       nonAdCount++;
       if (nonAdCount >= 2) {
         restorePlayback();
       }
     }
   }, 250);
+
+  // Periodic webapp banner cleaner (every 600ms)
+  setInterval(cleanWebappAds, 600);
+  cleanWebappAds();
 
 })();

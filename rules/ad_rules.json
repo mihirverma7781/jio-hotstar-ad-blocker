@@ -4,8 +4,8 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||scorecardresearch.com^",
-      "resourceTypes": ["script", "xmlhttprequest", "image", "ping"]
+      "urlFilter": "||hesads.akamaized.net^",
+      "resourceTypes": ["image", "media", "script", "xmlhttprequest"]
     }
   },
   {
@@ -13,8 +13,8 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||adobedtm.com^",
-      "resourceTypes": ["script", "xmlhttprequest", "image", "ping"]
+      "urlFilter": "||hspx.hotstar.com^",
+      "resourceTypes": ["script", "xmlhttprequest", "ping", "image"]
     }
   },
   {
@@ -22,7 +22,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||omtrdc.net^",
+      "urlFilter": "||scorecardresearch.com^",
       "resourceTypes": ["script", "xmlhttprequest", "image", "ping"]
     }
   },
@@ -31,7 +31,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||conviva.com^",
+      "urlFilter": "||adobedtm.com^",
       "resourceTypes": ["script", "xmlhttprequest", "image", "ping"]
     }
   },
@@ -40,7 +40,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||inmobi.com^",
+      "urlFilter": "||omtrdc.net^",
       "resourceTypes": ["script", "xmlhttprequest", "image", "ping"]
     }
   },
@@ -49,7 +49,7 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||pubmatic.com^",
+      "urlFilter": "||conviva.com^",
       "resourceTypes": ["script", "xmlhttprequest", "image", "ping"]
     }
   },
@@ -58,12 +58,39 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
+      "urlFilter": "||inmobi.com^",
+      "resourceTypes": ["script", "xmlhttprequest", "image", "ping"]
+    }
+  },
+  {
+    "id": 8,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "||pubmatic.com^",
+      "resourceTypes": ["script", "xmlhttprequest", "image", "ping"]
+    }
+  },
+  {
+    "id": 9,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
       "urlFilter": "||securepubads.g.doubleclick.net^",
       "resourceTypes": ["script", "xmlhttprequest", "sub_frame"]
     }
   },
   {
-    "id": 8,
+    "id": 10,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "||googleads.g.doubleclick.net^",
+      "resourceTypes": ["script", "xmlhttprequest", "sub_frame"]
+    }
+  },
+  {
+    "id": 11,
     "priority": 1,
     "action": { "type": "block" },
     "condition": {

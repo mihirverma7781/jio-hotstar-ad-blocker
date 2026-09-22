@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const toggleInstantSeek = document.getElementById('toggleInstantSeek');
   const toggleBlurAdVideo = document.getElementById('toggleBlurAdVideo');
   const toggleSkipIntros = document.getElementById('toggleSkipIntros');
+  const toggleRemoveWebappAds = document.getElementById('toggleRemoveWebappAds');
   const btnResetStats = document.getElementById('btnResetStats');
 
   // Format seconds into readable string (e.g. 45s, 3m 20s, 1h 12m)
@@ -70,6 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     toggleInstantSeek.checked = settings.instantSeek ?? true;
     toggleBlurAdVideo.checked = settings.blurAdVideo ?? true;
     toggleSkipIntros.checked = settings.skipIntros ?? true;
+    toggleRemoveWebappAds.checked = settings.removeWebappAds ?? true;
   }
 
   // Initial load
@@ -108,6 +110,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   toggleSkipIntros.addEventListener('change', (e) => {
     chrome.storage.local.set({ skipIntros: e.target.checked });
+  });
+
+  toggleRemoveWebappAds.addEventListener('change', (e) => {
+    chrome.storage.local.set({ removeWebappAds: e.target.checked });
   });
 
   // Bind Reset Stats Button
