@@ -17,14 +17,6 @@ const DEFAULT_SETTINGS = {
   tvPreferredQuality: '2160',
   tvPreferHDR: true,
   tvAdaptationStrategy: 'tv-balanced',
-  enhancementEnabled: true,
-  upscalerMode: 'NEURAL',
-  motionSmoothing: 'SMOOTH_60',
-  enhancementPreset: 'CINEMA',
-  enhancementScale: '2',
-  enhancementQuality: 'HIGH',
-  enhancementSharpness: 30,
-  hdrVisualEnhancement: true,
   adsSkipped: 0,
   secondsSaved: 0
 };
@@ -62,18 +54,6 @@ function initPopup() {
   const selTvQuality = document.getElementById('selTvQuality');
   const toggleTvHdr = document.getElementById('toggleTvHdr');
   const linkOpenLab = document.getElementById('linkOpenLab');
-
-  // Video Enhancement & 60 FPS elements
-  const toggleEnhancement = document.getElementById('toggleEnhancement');
-  const selUpscalerMode = document.getElementById('selUpscalerMode');
-  const selMotionSmoothing = document.getElementById('selMotionSmoothing');
-  const selPreset = document.getElementById('selPreset');
-  const selScale = document.getElementById('selScale');
-  const selQualityTier = document.getElementById('selQualityTier');
-  const rngSharpness = document.getElementById('rngSharpness');
-  const valSharpness = document.getElementById('valSharpness');
-  const toggleHdrVisual = document.getElementById('toggleHdrVisual');
-
   const btnResetStats = document.getElementById('btnResetStats');
 
   function updateUI(settings) {
@@ -125,17 +105,6 @@ function initPopup() {
     if (toggleTvMode) toggleTvMode.checked = merged.tvModeEnabled !== false;
     if (selTvQuality) selTvQuality.value = String(merged.tvPreferredQuality || '2160');
     if (toggleTvHdr) toggleTvHdr.checked = merged.tvPreferHDR !== false;
-
-    // Enhancement bindings
-    if (toggleEnhancement) toggleEnhancement.checked = merged.enhancementEnabled !== false;
-    if (selUpscalerMode) selUpscalerMode.value = merged.upscalerMode || 'NEURAL';
-    if (selMotionSmoothing) selMotionSmoothing.value = merged.motionSmoothing || 'SMOOTH_60';
-    if (selPreset) selPreset.value = merged.enhancementPreset || 'CINEMA';
-    if (selScale) selScale.value = String(merged.enhancementScale || '2');
-    if (selQualityTier) selQualityTier.value = merged.enhancementQuality || 'HIGH';
-    if (rngSharpness) rngSharpness.value = String(merged.enhancementSharpness !== undefined ? merged.enhancementSharpness : 30);
-    if (valSharpness) valSharpness.textContent = `${merged.enhancementSharpness !== undefined ? merged.enhancementSharpness : 30}%`;
-    if (toggleHdrVisual) toggleHdrVisual.checked = merged.hdrVisualEnhancement !== false;
   }
 
   // Load initial settings
@@ -229,57 +198,6 @@ function initPopup() {
     linkOpenLab.addEventListener('click', (e) => {
       e.preventDefault();
       chrome.tabs.create({ url: chrome.runtime.getURL('lab/index.html') });
-    });
-  }
-
-  // Bind Video Enhancement Controls
-  if (toggleEnhancement) {
-    toggleEnhancement.addEventListener('change', (e) => {
-      chrome.storage.local.set({ enhancementEnabled: e.target.checked });
-    });
-  }
-
-  if (selUpscalerMode) {
-    selUpscalerMode.addEventListener('change', (e) => {
-      chrome.storage.local.set({ upscalerMode: e.target.value });
-    });
-  }
-
-  if (selMotionSmoothing) {
-    selMotionSmoothing.addEventListener('change', (e) => {
-      chrome.storage.local.set({ motionSmoothing: e.target.value });
-    });
-  }
-
-  if (selPreset) {
-    selPreset.addEventListener('change', (e) => {
-      chrome.storage.local.set({ enhancementPreset: e.target.value });
-    });
-  }
-
-  if (selScale) {
-    selScale.addEventListener('change', (e) => {
-      chrome.storage.local.set({ enhancementScale: e.target.value });
-    });
-  }
-
-  if (selQualityTier) {
-    selQualityTier.addEventListener('change', (e) => {
-      chrome.storage.local.set({ enhancementQuality: e.target.value });
-    });
-  }
-
-  if (rngSharpness) {
-    rngSharpness.addEventListener('input', (e) => {
-      const val = parseInt((e.target as HTMLInputElement).value, 10);
-      if (valSharpness) valSharpness.textContent = `${val}%`;
-      chrome.storage.local.set({ enhancementSharpness: val });
-    });
-  }
-
-  if (toggleHdrVisual) {
-    toggleHdrVisual.addEventListener('change', (e) => {
-      chrome.storage.local.set({ hdrVisualEnhancement: e.target.checked });
     });
   }
 

@@ -135,157 +135,6 @@
       </div>
     </div>
 
-    <!-- TV Mode — UHD/HDR Playback Emulator Section -->
-    <div class="section-title">TV Mode — UHD/HDR Playback</div>
-    <div class="settings-list">
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">TV Mode Emulator</span>
-          <span class="setting-desc">Emulates 4K HDR Smart-TV selection & ABR</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="toggleTvMode" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Target Resolution</span>
-          <span class="setting-desc">Prefers UHD when exposed & decodable</span>
-        </div>
-        <select id="selTvQuality" class="popup-select">
-          <option value="2160">4K UHD (2160p)</option>
-          <option value="1440">QHD (1440p)</option>
-          <option value="1080">FHD (1080p)</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Prefer HDR</span>
-          <span class="setting-desc">Prioritizes HDR10 on capable displays</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="toggleTvHdr" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">TV Playback Lab</span>
-          <span class="setting-desc">Interactive test bench for DASH/HLS</span>
-        </div>
-        <a href="../lab/index.html" id="linkOpenLab" class="btn-lab-launch">Open Lab ↗</a>
-      </div>
-    </div>
-
-    <!-- Real Video Enhancement + Super-Resolution & 60 FPS Section -->
-    <div class="section-title">Video Super-Resolution & 60 FPS</div>
-    <div class="settings-list">
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">GPU Video Enhancement</span>
-          <span class="setting-desc">Real-time pixel upscaling & super-resolution</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="toggleEnhancement" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Upscaler Mode</span>
-          <span class="setting-desc">GPU neural/edge super-resolution</span>
-        </div>
-        <select id="selUpscalerMode" class="popup-select">
-          <option value="NEURAL">Neural AI (FSRCNN/ESPCN)</option>
-          <option value="ENHANCED">Enhanced (Edge-Aware)</option>
-          <option value="BASIC">Basic (Bicubic)</option>
-          <option value="AUTO">Auto-Adaptive</option>
-          <option value="OFF">Off</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">60 FPS Motion Smoothing</span>
-          <span class="setting-desc">GPU optical flow frame interpolation</span>
-        </div>
-        <select id="selMotionSmoothing" class="popup-select">
-          <option value="SMOOTH_60">Smooth 60 FPS (Active)</option>
-          <option value="CINEMATIC_48">Cinematic 48 FPS</option>
-          <option value="AUTO">Auto Motion</option>
-          <option value="OFF">Off (Native)</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Enhancement Preset</span>
-          <span class="setting-desc">Tailored video profiles</span>
-        </div>
-        <select id="selPreset" class="popup-select">
-          <option value="CINEMA">Cinema 4K (Recommended)</option>
-          <option value="SPORTS">Live Sports (60 FPS)</option>
-          <option value="VIVID">Vivid Clarity</option>
-          <option value="ANIME">Anime & Animation</option>
-          <option value="HDR_ENHANCE">HDR Tone Enhance</option>
-          <option value="CLEAN">Clean & Denoised</option>
-          <option value="NATURAL">Natural</option>
-          <option value="CUSTOM">Custom Profile</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Target Scale</span>
-          <span class="setting-desc">1080p source enhanced to 4K</span>
-        </div>
-        <select id="selScale" class="popup-select">
-          <option value="2">2.0x (1080p → 4K)</option>
-          <option value="3">3.0x (720p → 4K)</option>
-          <option value="4">4.0x (480p/540p → 4K)</option>
-          <option value="DISPLAY_NATIVE">Display Native</option>
-          <option value="AUTO">Auto Scale</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Quality Tier</span>
-          <span class="setting-desc">Dynamic performance budget</span>
-        </div>
-        <select id="selQualityTier" class="popup-select">
-          <option value="HIGH">High (Balanced Neural)</option>
-          <option value="ULTRA">Ultra (Maximum AI)</option>
-          <option value="BALANCED">Balanced (GPU Fast)</option>
-          <option value="PERFORMANCE">Performance (Low Power)</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Sharpness (<span id="valSharpness">30%</span>)</span>
-          <span class="setting-desc">Edge-aware unsharp mask without halos</span>
-        </div>
-        <input type="range" id="rngSharpness" min="0" max="100" value="30" class="popup-slider">
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">HDR Visual Tone</span>
-          <span class="setting-desc">Perceptual dynamic range expansion</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="toggleHdrVisual" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-    </div>
-
     <!-- Screen Sharing & Presentation Mode -->
     <div class="section-title">Screen Sharing & Presentation</div>
     <div class="settings-list">
@@ -301,16 +150,16 @@
       </div>
     </div>
 
-    <!-- Educational DRM Screen Sharing Card (Collapsible) -->
-    <details class="card info-card">
-      <summary class="info-header" style="cursor: pointer; list-style: none; user-select: none;">
+    <!-- Educational DRM Screen Sharing Card -->
+    <div class="card info-card">
+      <div class="info-header">
         <span class="info-icon">ℹ️</span>
-        <span class="info-title">Why Video Appears Black in Screen Shares ▾</span>
-      </summary>
-      <p class="info-text" style="margin-top: 8px;">
+        <span class="info-title">Why Video Appears Black in Screen Shares</span>
+      </div>
+      <p class="info-text">
         Hardware DRM (Widevine/HDCP) and OS secure surfaces intentionally mask protected video frames from capture tools (Google Meet, Teams, Zoom). This is enforced by your browser and GPU drivers to protect copyrighted media. Presenter Mode provides a clean, clutter-free tab for your meetings.
       </p>
-    </details>
+    </div>
 
     <!-- Footer Actions -->
     <footer class="footer">

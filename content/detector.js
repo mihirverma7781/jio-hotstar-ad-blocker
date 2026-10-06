@@ -226,33 +226,20 @@
   // In-WebApp Ad & Promo Removal
   // ==========================================
   const WEBAPP_AD_SELECTORS = [
-    // Hotstar Billboards & Companion Ads
+    // Hotstar Billboard & Companion Cards — exact data-testid only
     'div[data-testid="bbtype-video"]',
     'div[data-testid="bbtype-image"]',
-    '[data-testid*="billboard"]',
-    '[data-testid*="bbtype"]',
-    '[data-testid*="companion"]',
-    '[data-testid*="breakout"]',
-    '[data-testid*="leadgen"]',
-    '[data-testid*="cte-"]',
-    '[data-testid*="ad-banner"]',
-    '[class*="billboard" i]',
-    '[class*="companionCard" i]',
-    '[class*="breakoutAd" i]',
-    // Prime Video Promo / Upsell banners
-    '[data-testid*="banner-upsell"]',
-    '[class*="pv-banner-upsell" i]',
-    // Sidebar Upgrade / Payment links
-    'a[href*="/subscribe"]',
-    'a[href*="/payment"]',
-    '[data-testid*="upgrade"]',
-    // Generic Ad slots
-    '[id*="google_ads" i]',
-    '[id*="gpt-ad" i]',
-    '[id*="gam-ad" i]',
-    '[id*="ad-slot" i]',
-    'iframe[src*="doubleclick" i]',
-    'iframe[src*="jioads" i]'
+    '[data-testid="billboard"]',
+    '[data-testid^="bbtype-"]',
+    '[data-testid^="breakout-ad"]',
+    '[data-testid^="companion-ad"]',
+    '[data-testid^="leadgen-ad"]',
+    '[data-testid^="cte-ad"]',
+    '[data-testid="ad-banner"]',
+    // Third-party ad iframes
+    'iframe[src*="doubleclick.net"]',
+    'iframe[src*="jioads.in"]',
+    'iframe[id="google_ads_iframe"]'
   ];
 
   function cleanWebappAds() {

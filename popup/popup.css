@@ -21,39 +21,15 @@
   padding: 0;
 }
 
-html {
-  width: 360px;
-  height: 540px;
-  background-color: var(--bg-main);
-}
-
 body {
   width: 360px;
-  height: 540px;
-  max-height: 540px;
   background-color: var(--bg-main);
   color: var(--text-main);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 13px;
   line-height: 1.4;
   user-select: none;
-  overflow-y: auto;
   overflow-x: hidden;
-}
-
-/* Sleek custom scrollbar */
-body::-webkit-scrollbar {
-  width: 5px;
-}
-body::-webkit-scrollbar-track {
-  background: rgba(11, 15, 25, 0.4);
-}
-body::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
-}
-body::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
 }
 
 .container {
@@ -411,76 +387,4 @@ input:checked + .slider:before {
   color: var(--text-dim);
   line-height: 1.45;
 }
-
-/* TV Mode Select Dropdown & Launch Button */
-.popup-select {
-  background: rgba(15, 23, 42, 0.9);
-  color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  padding: 5px 8px;
-  font-size: 11.5px;
-  font-weight: 600;
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.2s;
-}
-
-.popup-select:hover, .popup-select:focus {
-  border-color: var(--accent);
-}
-
-.popup-select option {
-  background: #0f172a;
-  color: #f8fafc;
-}
-
-.btn-lab-launch {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-space-cadet, rgba(59, 130, 246, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.35);
-  color: #60a5fa;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 5px 11px;
-  border-radius: 6px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-lab-launch:hover {
-  background: rgba(59, 130, 246, 0.3);
-  border-color: #3b82f6;
-  color: #ffffff;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
-}
-
-/* Super-Resolution & Enhancement Slider */
-.popup-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 96px;
-  height: 6px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.15);
-  outline: none;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.popup-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent-glow);
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-}
-
 

@@ -215,22 +215,20 @@
 
 /* ================================================================
  * IN-WEBAPP AD BLOCKING & COSMETIC FILTERING
- * Suppresses billboards, promotional banners, companion cards,
- * sidebar upgrade nudges, and Google/Jio ad slots.
+ * ONLY targets known Hotstar/JioCinema ad elements by exact
+ * data-testid values or CDN origin. No href/class broad matching.
  * ================================================================ */
 
-/* 1. Hotstar Billboards & Video/Image Banner Cards */
+/* 1. Hotstar Billboard & Companion Ad Cards — exact data-testid match */
 div[data-testid="bbtype-video"],
 div[data-testid="bbtype-image"],
-[data-testid*="billboard"],
-[data-testid*="bbtype"],
-[data-testid*="breakout"],
-[data-testid*="leadgen"],
-[data-testid*="companion"],
-[data-testid*="cte-"],
-[class*="billboard" i],
-[class*="companionCard" i],
-[class*="breakoutAd" i] {
+[data-testid="billboard"],
+[data-testid^="bbtype-"],
+[data-testid^="breakout-ad"],
+[data-testid^="companion-ad"],
+[data-testid^="leadgen-ad"],
+[data-testid^="cte-ad"],
+[data-testid="ad-banner"] {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
@@ -242,54 +240,30 @@ div[data-testid="bbtype-image"],
   overflow: hidden !important;
 }
 
-/* 2. Hotstar Ad CDN Assets (hesads.akamaized.net) & Containers */
+/* 2. Hotstar Ad CDN Assets (hesads.akamaized.net) & their wrappers */
 img[src*="hesads.akamaized.net"],
 video[src*="hesads.akamaized.net"],
 div:has(> img[src*="hesads.akamaized.net"]),
-div:has(> video[src*="hesads.akamaized.net"]),
-div:has(> * > img[src*="hesads.akamaized.net"]),
-div:has(> * > video[src*="hesads.akamaized.net"]) {
+div:has(> video[src*="hesads.akamaized.net"]) {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
   opacity: 0 !important;
 }
 
-/* 3. Collapse parent tray wrappers holding billboard ads */
-div:has(> div[data-testid*="bbtype"]),
-div:has(> [data-testid*="billboard"]),
-div:has(> [class*="billboard" i]) {
+/* 3. Collapse tray wrappers that only hold bbtype billboard ads */
+div:has(> div[data-testid^="bbtype-"]),
+div:has(> div[data-testid="billboard"]) {
   display: none !important;
   height: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
 }
 
-/* 4. Sidebar Upgrade Pill & Subscription Upsell Prompts */
-a[href*="/subscribe"],
-a[href*="/payment"],
-[data-testid*="upgrade"],
-[class*="upgrade-button" i],
-[class*="upgradeBtn" i],
-div:has(> a[href*="/subscribe"]) {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-}
-
-/* 5. Generic Ad Banner Containers across Hotstar and JioCinema */
-[class*="adBanner" i],
-[class*="ad-banner" i],
-[class*="banner-ad" i],
-[class*="masthead-ad" i],
-[data-testid*="ad-banner" i],
-[id*="google_ads" i],
-[id*="gpt-ad" i],
-[id*="gam-ad" i],
-[id*="ad-slot" i],
-iframe[src*="doubleclick" i],
-iframe[src*="jioads" i],
-iframe[src*="/ads/" i] {
+/* 4. Third-party ad iframes injected inside the webapp */
+iframe[src*="doubleclick.net"],
+iframe[src*="jioads.in"],
+iframe[id="google_ads_iframe"] {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;

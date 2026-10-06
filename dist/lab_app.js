@@ -825,12 +825,16 @@
      */
     static attachKeyboardShortcut() {
       if (typeof window === "undefined") return;
-      window.addEventListener("keydown", (e) => {
-        if (e.altKey && e.shiftKey && (e.key === "D" || e.key === "d")) {
-          e.preventDefault();
-          this.toggleHUD();
-        }
-      });
+      window.addEventListener(
+        "keydown",
+        (e) => {
+          if (e.altKey && e.shiftKey && e.code === "KeyD") {
+            e.preventDefault();
+            this.toggleHUD();
+          }
+        },
+        { capture: true }
+      );
     }
     /**
      * Service Analysis (Prime Web Research Mode):
@@ -2683,6 +2687,85 @@ void main() {
     }
   };
 
+  // src/enhancement/CompositorEnhancer.ts
+  var CompositorEnhancer = class _CompositorEnhancer {
+    static FILTER_ID = "tv-mode-compositor-sharpen";
+    svgRoot = null;
+    convolveEl = null;
+    appliedVideos = /* @__PURE__ */ new WeakSet();
+    ensureSvgFilter() {
+      if (this.svgRoot || typeof document === "undefined") return;
+      const NS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("width", "0");
+      svg.setAttribute("height", "0");
+      svg.style.position = "absolute";
+      svg.style.pointerEvents = "none";
+      const filter = document.createElementNS(NS, "filter");
+      filter.setAttribute("id", _CompositorEnhancer.FILTER_ID);
+      filter.setAttribute("color-interpolation-filters", "sRGB");
+      const convolve = document.createElementNS(NS, "feConvolveMatrix");
+      convolve.setAttribute("order", "3");
+      convolve.setAttribute("kernelMatrix", "0 0 0 0 1 0 0 0 0");
+      convolve.setAttribute("divisor", "1");
+      convolve.setAttribute("edgeMode", "duplicate");
+      convolve.setAttribute("preserveAlpha", "true");
+      filter.appendChild(convolve);
+      svg.appendChild(filter);
+      (document.body || document.documentElement).appendChild(svg);
+      this.svgRoot = svg;
+      this.convolveEl = convolve;
+    }
+    buildFilterString(config) {
+      this.ensureSvgFilter();
+      const contrastPct = Math.max(50, Math.min(200, config.contrast));
+      const saturatePct = Math.max(0, Math.min(200, config.saturation));
+      const sharpenAmount = Math.max(0, Math.min(100, config.sharpness)) / 100;
+      if (this.convolveEl) {
+        const center = 1 + 4 * sharpenAmount;
+        const edge = -sharpenAmount;
+        this.convolveEl.setAttribute("kernelMatrix", `0 ${edge} 0 ${edge} ${center} ${edge} 0 ${edge} 0`);
+      }
+      let brightnessPct = 100;
+      if (config.hdrVisualEnhancement) {
+        brightnessPct = config.hdrIntensity === "VIVID" ? 108 : config.hdrIntensity === "BALANCED" ? 104 : 101;
+      }
+      const filters = [`url(#${_CompositorEnhancer.FILTER_ID})`, `contrast(${contrastPct}%)`, `saturate(${saturatePct}%)`];
+      if (brightnessPct !== 100) filters.push(`brightness(${brightnessPct}%)`);
+      return filters.join(" ");
+    }
+    /**
+     * Applies the compositor-level filter chain directly to the <video> element.
+     * Safe to call every frame; only touches the DOM when the computed filter changes.
+     */
+    apply(video, config) {
+      if (!video || !video.style) return;
+      if (!config.enabled || config.upscalerMode === "OFF") {
+        this.clear(video);
+        return;
+      }
+      const filterString = this.buildFilterString(config);
+      if (video.style.filter !== filterString) {
+        video.style.filter = filterString;
+        video.style.willChange = "filter";
+      }
+      this.appliedVideos.add(video);
+    }
+    clear(video) {
+      if (!video || !video.style || !this.appliedVideos.has(video)) return;
+      video.style.filter = "";
+      video.style.willChange = "";
+      this.appliedVideos.delete(video);
+    }
+    destroy() {
+      if (this.svgRoot && this.svgRoot.parentElement) {
+        this.svgRoot.parentElement.removeChild(this.svgRoot);
+      }
+      this.svgRoot = null;
+      this.convolveEl = null;
+    }
+  };
+
   // src/enhancement/EnhancementPipeline.ts
   var EnhancementPipeline = class {
     frameAccessManager;
@@ -2690,6 +2773,7 @@ void main() {
     interpolator;
     hdrEnhancer;
     performanceController;
+    compositorEnhancer;
     gpuProcessor = null;
     latestMetrics;
     constructor(frameAccessManager, upscalerEngine, interpolator, hdrEnhancer, performanceController, gpuProcessor = null) {
@@ -2699,6 +2783,7 @@ void main() {
       this.hdrEnhancer = hdrEnhancer;
       this.performanceController = performanceController;
       this.gpuProcessor = gpuProcessor;
+      this.compositorEnhancer = new CompositorEnhancer();
       this.latestMetrics = this.getInitialMetrics();
     }
     setGpuProcessor(processor) {
@@ -2752,7 +2837,11 @@ void main() {
       let gpuTime = 0;
       let modeUsed = adaptiveProfile.recommendedMode;
       let backendUsed = "WebGL2";
-      if (accessReport.capability !== "COMPOSITOR_ENHANCEMENT" && this.gpuProcessor && !config.bypassEnhancement) {
+      const isCompositorPath = accessReport.capability === "COMPOSITOR_ENHANCEMENT";
+      let tookRealGpuPixelPath = false;
+      if (!isCompositorPath && this.gpuProcessor && !config.bypassEnhancement) {
+        tookRealGpuPixelPath = true;
+        this.compositorEnhancer.clear(video);
         const adaptedConfig = {
           ...config,
           denoise: config.denoise === "LOW" ? adaptiveProfile.recommendedDenoise : config.denoise,
@@ -2772,21 +2861,28 @@ void main() {
         backendUsed = this.gpuProcessor.getBackend();
       } else {
         backendUsed = "Compositor";
-        modeUsed = config.upscalerMode === "OFF" ? "OFF" : "ENHANCED";
+        if (config.bypassEnhancement) {
+          this.compositorEnhancer.clear(video);
+          modeUsed = "OFF";
+        } else {
+          this.compositorEnhancer.apply(video, config);
+          modeUsed = config.upscalerMode === "OFF" ? "OFF" : "ENHANCED";
+        }
       }
+      const motionSmoothingActive = tookRealGpuPixelPath && config.motionSmoothing !== "OFF" && motionTiming.isInterpolated;
       this.performanceController.recordFrame(gpuTime, video);
       this.performanceController.setInputFps(this.interpolator.getInputFps());
       const perfStats = this.performanceController.getStats();
       this.latestMetrics = {
         sourceResolution: { width: srcW, height: srcH },
-        outputResolution: adaptiveProfile.outputResolution,
-        scaleFactor: adaptiveProfile.targetScale,
+        outputResolution: tookRealGpuPixelPath ? adaptiveProfile.outputResolution : { width: srcW, height: srcH },
+        scaleFactor: tookRealGpuPixelPath ? adaptiveProfile.targetScale : 1,
         effectiveMode: modeUsed,
         effectiveTier: perfStats.currentTier,
         inputFps: this.interpolator.getInputFps(),
         outputFps: perfStats.renderFps,
         targetFps: motionTiming.targetFps,
-        motionSmoothingActive: config.motionSmoothing !== "OFF" && motionTiming.isInterpolated,
+        motionSmoothingActive,
         gpuBackend: backendUsed,
         gpuProcessingTimeMs: gpuTime,
         inferenceTimeMs: modeUsed === "NEURAL" ? Math.round(gpuTime * 0.6 * 10) / 10 : 0,
@@ -2794,19 +2890,28 @@ void main() {
         droppedFrames: perfStats.droppedFrames,
         processingLoadPercent: perfStats.loadPercent,
         frameAccessCapability: accessReport.capability,
-        diagnosticReason: accessReport.diagnosticReason,
+        diagnosticReason: isCompositorPath ? "DRM_PROTECTED: pixel super-resolution & frame interpolation unavailable \u2014 CSS compositor filter only" : accessReport.diagnosticReason,
         hdrSource: hdrStatus.isGenuineHdrSource,
         hdrVisualEnhancement: hdrStatus.hdrVisualEnhancementActive,
         sharpness: config.sharpness,
         denoise: config.denoise,
         deblock: config.deblock,
-        psnrEstimateDb: modeUsed === "NEURAL" ? 36.8 : modeUsed === "ENHANCED" ? 33.4 : 30.2,
-        ssimEstimate: modeUsed === "NEURAL" ? 0.94 : modeUsed === "ENHANCED" ? 0.89 : 0.82
+        ...tookRealGpuPixelPath ? {
+          psnrEstimateDb: modeUsed === "NEURAL" ? 36.8 : modeUsed === "ENHANCED" ? 33.4 : 30.2,
+          ssimEstimate: modeUsed === "NEURAL" ? 0.94 : modeUsed === "ENHANCED" ? 0.89 : 0.82
+        } : {}
       };
       return { rendered: true, metrics: this.latestMetrics };
     }
     getMetrics() {
       return this.latestMetrics;
+    }
+    /** Removes any compositor CSS filter left on a video element being detached. */
+    clearVideo(video) {
+      this.compositorEnhancer.clear(video);
+    }
+    destroy() {
+      this.compositorEnhancer.destroy();
     }
   };
 
@@ -2828,6 +2933,7 @@ void main() {
     isRunning = false;
     rvfcId = null;
     rafId = null;
+    lastRenderErrorLogMs = 0;
     constructor(customConfig) {
       this.config = {
         enabled: true,
@@ -2871,25 +2977,32 @@ void main() {
     }
     initKeyboardShortcuts() {
       if (typeof window === "undefined") return;
-      window.addEventListener("keydown", (e) => {
-        if (e.altKey && e.shiftKey && (e.key === "E" || e.key === "e")) {
-          e.preventDefault();
-          this.toggleBypass();
-        }
-        if (e.altKey && e.shiftKey && (e.key === "S" || e.key === "s")) {
-          e.preventDefault();
-          this.toggleSideBySide();
-        }
-        if (e.altKey && e.shiftKey && (e.key === "H" || e.key === "h")) {
-          e.preventDefault();
-          this.config.showDebugHud = !this.config.showDebugHud;
-          this.updateHudVisibility();
-        }
-      });
+      window.addEventListener(
+        "keydown",
+        (e) => {
+          if (e.altKey && e.shiftKey && e.code === "KeyE") {
+            e.preventDefault();
+            this.toggleBypass();
+          }
+          if (e.altKey && e.shiftKey && e.code === "KeyS") {
+            e.preventDefault();
+            this.toggleSideBySide();
+          }
+          if (e.altKey && e.shiftKey && e.code === "KeyH") {
+            e.preventDefault();
+            this.config.showDebugHud = !this.config.showDebugHud;
+            this.updateHudVisibility();
+          }
+        },
+        { capture: true }
+      );
     }
     async attachToVideo(video) {
       if (this.activeVideo === video) return;
       this.stopRenderLoop();
+      if (this.activeVideo) {
+        this.pipeline.clearVideo(this.activeVideo);
+      }
       this.activeVideo = video;
       if (!video) {
         this.removePresentationCanvas();
@@ -2939,17 +3052,27 @@ void main() {
       this.isRunning = true;
       const renderTick = (now, metadata) => {
         if (!this.isRunning || !this.activeVideo) return;
-        if (metadata && metadata.mediaTime) {
-          this.interpolator.onSourceFrame(metadata.mediaTime, metadata.expectedDisplayTime || now);
+        try {
+          if (metadata && metadata.mediaTime) {
+            this.interpolator.onSourceFrame(metadata.mediaTime, metadata.expectedDisplayTime || now);
+          }
+          this.syncCanvasPosition();
+          if (this.config.bypassEnhancement || !this.config.enabled) {
+            if (this.presentationCanvas) this.presentationCanvas.style.opacity = "0";
+          } else {
+            const { metrics } = this.pipeline.processFrame(this.activeVideo, this.config, now);
+            if (this.presentationCanvas) {
+              this.presentationCanvas.style.opacity = metrics.gpuBackend === "Compositor" ? "0" : "1";
+            }
+          }
+          this.updateHudMetrics(this.pipeline.getMetrics());
+        } catch (err) {
+          if (now - this.lastRenderErrorLogMs > 2e3) {
+            this.lastRenderErrorLogMs = now;
+            console.error("[VideoEnhancement] renderTick failed, will retry next frame:", err);
+          }
         }
-        this.syncCanvasPosition();
-        if (this.config.bypassEnhancement || !this.config.enabled) {
-          if (this.presentationCanvas) this.presentationCanvas.style.opacity = "0";
-        } else {
-          if (this.presentationCanvas) this.presentationCanvas.style.opacity = "1";
-          this.pipeline.processFrame(this.activeVideo, this.config, now);
-        }
-        this.updateHudMetrics(this.pipeline.getMetrics());
+        if (!this.isRunning || !this.activeVideo) return;
         if ("requestVideoFrameCallback" in this.activeVideo) {
           this.rvfcId = this.activeVideo.requestVideoFrameCallback(renderTick);
         } else {
@@ -3037,15 +3160,17 @@ void main() {
       if (!this.hudElement || !this.config.showDebugHud) return;
       const sourceLabel = `${m.sourceResolution.width}\xD7${m.sourceResolution.height}`;
       const outputLabel = `${m.outputResolution.width}\xD7${m.outputResolution.height}`;
-      const modeLabel = this.config.bypassEnhancement ? "BYPASS (ORIGINAL)" : m.effectiveMode;
-      const smoothingText = m.motionSmoothingActive ? `60 FPS (ACTIVE)` : `${m.outputFps} FPS`;
+      const isCompositor = m.gpuBackend === "Compositor";
+      const modeLabel = this.config.bypassEnhancement ? "BYPASS (ORIGINAL)" : isCompositor ? "COMPOSITOR (CSS FILTER)" : m.effectiveMode;
+      const smoothingText = m.motionSmoothingActive ? `60 FPS (ACTIVE)` : isCompositor ? `UNAVAILABLE (DRM)` : `${m.outputFps} FPS`;
       this.hudElement.innerHTML = `
       <div style="font-weight:bold; color:#60a5fa; margin-bottom:4px; font-size:12px;">\u26A1 VIDEO ENHANCEMENT ENGINE</div>
       <div><strong>SOURCE:</strong> ${sourceLabel}</div>
-      <div><strong>UPSCALE:</strong> ${m.scaleFactor.toFixed(1)}x</div>
+      <div><strong>UPSCALE:</strong> ${m.scaleFactor.toFixed(1)}x${isCompositor ? " (pixel SR unavailable)" : ""}</div>
       <div><strong>OUTPUT:</strong> ${outputLabel}</div>
       <div><strong>MODE:</strong> <span style="color:#34d399;">${modeLabel}</span> (${m.effectiveTier})</div>
       <div><strong>MOTION:</strong> ${smoothingText} (In: ${m.inputFps}fps)</div>
+      ${isCompositor ? '<div style="font-size:10px; color:#f59e0b; margin-top:2px;">DRM-protected frame: only contrast/saturation/sharpen filter applied</div>' : ""}
       <div><strong>GPU:</strong> ${m.gpuBackend} (${m.gpuProcessingTimeMs}ms)</div>
       <div><strong>SHARPNESS:</strong> ${m.sharpness}% | <strong>DENOISE:</strong> ${m.denoise}</div>
       <div><strong>HDR:</strong> SOURCE: ${m.hdrSource ? "YES" : "NO"} | VISUAL: ${m.hdrVisualEnhancement ? "ON" : "OFF"}</div>
@@ -3069,9 +3194,13 @@ void main() {
     }
     destroy() {
       this.stopRenderLoop();
+      if (this.activeVideo) {
+        this.pipeline.clearVideo(this.activeVideo);
+      }
       this.removePresentationCanvas();
       this.removeHud();
       this.tracker.destroy();
+      this.pipeline.destroy();
     }
   };
 
