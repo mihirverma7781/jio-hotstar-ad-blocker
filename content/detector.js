@@ -223,50 +223,35 @@
   }
 
   // ==========================================
-  // In-WebApp Ad & Promo Removal
+  // In-WebApp Ad Removal — CDN-safe only
+  // Only hides elements we can identify 100% by their network origin.
+  // No data-testid, no class names, no parent collapsing.
   // ==========================================
-  const WEBAPP_AD_SELECTORS = [
-    // Hotstar Billboard & Companion Cards — exact data-testid only
-    'div[data-testid="bbtype-video"]',
-    'div[data-testid="bbtype-image"]',
-    '[data-testid="billboard"]',
-    '[data-testid^="bbtype-"]',
-    '[data-testid^="breakout-ad"]',
-    '[data-testid^="companion-ad"]',
-    '[data-testid^="leadgen-ad"]',
-    '[data-testid^="cte-ad"]',
-    '[data-testid="ad-banner"]',
-    // Third-party ad iframes
-    'iframe[src*="doubleclick.net"]',
-    'iframe[src*="jioads.in"]',
-    'iframe[id="google_ads_iframe"]'
-  ];
 
   function cleanWebappAds() {
     if (!settings.enabled || !settings.removeWebappAds) return;
 
-    for (let i = 0; i < WEBAPP_AD_SELECTORS.length; i++) {
-      const ads = document.querySelectorAll(WEBAPP_AD_SELECTORS[i]);
-      for (let j = 0; j < ads.length; j++) {
-        const el = ads[j];
-        if (el && el.style.display !== 'none') {
-          el.style.setProperty('display', 'none', 'important');
-          el.style.setProperty('visibility', 'hidden', 'important');
-          el.style.setProperty('height', '0', 'important');
-          el.style.setProperty('margin', '0', 'important');
-          el.style.setProperty('padding', '0', 'important');
-        }
-      }
-    }
+    // Hide injected third-party ad iframes
+    const adIframes = document.querySelectorAll(
+      'iframe[src*="doubleclick.net"], iframe[src*="jioads.in"], iframe[src*="googlesyndication.com"], iframe[id="google_ads_iframe"]'
+    );
+    adIframes.forEach((el) => {
+      el.style.setProperty('display', 'none', 'important');
+      el.style.setProperty('visibility', 'hidden', 'important');
+      el.style.setProperty('height', '0', 'important');
+      el.style.setProperty('width', '0', 'important');
+    });
 
+    // On Hotstar only: hide images/video served from the Hotstar ad CDN
     if (isHotstar) {
-      const adMedia = document.querySelectorAll('img[src*="hesads.akamaized.net"], video[src*="hesads.akamaized.net"]');
-      for (let i = 0; i < adMedia.length; i++) {
-        const card = adMedia[i].closest('div[class*="card"], div[class*="banner"], div[class*="widget"], div[data-testid]') || adMedia[i];
-        if (card && card.style.display !== 'none') {
-          card.style.setProperty('display', 'none', 'important');
-        }
-      }
+      const adMedia = document.querySelectorAll(
+        'img[src*="hesads.akamaized.net"], video[src*="hesads.akamaized.net"]'
+      );
+      adMedia.forEach((el) => {
+        el.style.setProperty('display', 'none', 'important');
+        el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('opacity', '0', 'important');
+      });
     }
   }
 

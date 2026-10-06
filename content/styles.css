@@ -214,59 +214,29 @@
 }
 
 /* ================================================================
- * IN-WEBAPP AD BLOCKING & COSMETIC FILTERING
- * ONLY targets known Hotstar/JioCinema ad elements by exact
- * data-testid values or CDN origin. No href/class broad matching.
+ * IN-WEBAPP AD BLOCKING — SAFE CDN-ORIGIN RULES ONLY
+ * data-testid and :has() rules removed — they caused false positives
+ * on Hotstar layout containers wiping entire page sections.
  * ================================================================ */
 
-/* 1. Hotstar Billboard & Companion Ad Cards — exact data-testid match */
-div[data-testid="bbtype-video"],
-div[data-testid="bbtype-image"],
-[data-testid="billboard"],
-[data-testid^="bbtype-"],
-[data-testid^="breakout-ad"],
-[data-testid^="companion-ad"],
-[data-testid^="leadgen-ad"],
-[data-testid^="cte-ad"],
-[data-testid="ad-banner"] {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  max-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  opacity: 0 !important;
-  overflow: hidden !important;
-}
-
-/* 2. Hotstar Ad CDN Assets (hesads.akamaized.net) & their wrappers */
+/* 1. Hotstar Ad CDN assets — zero false-positive risk (unique domain) */
 img[src*="hesads.akamaized.net"],
-video[src*="hesads.akamaized.net"],
-div:has(> img[src*="hesads.akamaized.net"]),
-div:has(> video[src*="hesads.akamaized.net"]) {
+video[src*="hesads.akamaized.net"] {
   display: none !important;
   visibility: hidden !important;
-  height: 0 !important;
   opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-/* 3. Collapse tray wrappers that only hold bbtype billboard ads */
-div:has(> div[data-testid^="bbtype-"]),
-div:has(> div[data-testid="billboard"]) {
-  display: none !important;
-  height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* 4. Third-party ad iframes injected inside the webapp */
+/* 2. Third-party ad iframes injected inside the webapp */
 iframe[src*="doubleclick.net"],
 iframe[src*="jioads.in"],
-iframe[id="google_ads_iframe"] {
+iframe[id="google_ads_iframe"],
+iframe[src*="googlesyndication.com"] {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
+  width: 0 !important;
   opacity: 0 !important;
 }
 
