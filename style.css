@@ -1108,6 +1108,7 @@ body {
 .footer-col-links a {
   color: var(--slate);
   font-size: 13px;
+  font-weight: 500;
   text-decoration: none;
   transition: color 0.15s ease;
 }
