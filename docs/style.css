@@ -18,8 +18,9 @@
   --text-muted: #94a3b8;
   --text-dim: #64748b;
 
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -124,21 +125,22 @@ body {
   gap: 10px;
   text-decoration: none;
   color: #fff;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-weight: 700;
   font-size: 19px;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.02em;
 }
 
 .brand-icon {
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #2563eb, #06b6d4);
+  background: #182234;
+  border: 1px solid rgba(59, 130, 246, 0.4);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  box-shadow: 0 0 16px rgba(37, 99, 235, 0.4);
+  color: #38bdf8;
 }
 
 .nav-links {
@@ -255,10 +257,11 @@ body {
 }
 
 .hero-title {
-  font-size: 56px;
-  font-weight: 800;
-  line-height: 1.12;
-  letter-spacing: -1.5px;
+  font-family: var(--font-display);
+  font-size: 58px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
   margin-bottom: 22px;
   max-width: 880px;
 }
@@ -401,9 +404,10 @@ body {
 }
 
 .section-title {
+  font-family: var(--font-display);
   font-size: 38px;
-  font-weight: 800;
-  letter-spacing: -0.8px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
   margin-bottom: 14px;
 }
 
@@ -688,8 +692,10 @@ body {
 }
 
 .bento-card h3 {
+  font-family: var(--font-display);
   font-size: 20px;
   font-weight: 700;
+  letter-spacing: -0.02em;
   margin-bottom: 12px;
   color: #fff;
 }
@@ -709,9 +715,12 @@ body {
 }
 
 .metric-num {
+  font-family: var(--font-mono);
   font-size: 32px;
-  font-weight: 800;
+  font-weight: 700;
+  letter-spacing: -0.03em;
   color: #38bdf8;
+  font-variant-numeric: tabular-nums;
 }
 
 .metric-sub {
