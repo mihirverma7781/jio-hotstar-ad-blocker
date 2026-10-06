@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hotstar & Prime Video Skipper</title>
+  <title>HyperSkip — Streaming Fast-Forward</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -11,10 +11,15 @@
     <!-- Header -->
     <header class="header">
       <div class="brand">
-        <div class="logo-icon">⚡</div>
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="13 17 18 12 13 7"></polyline>
+            <polyline points="6 17 11 12 6 7"></polyline>
+          </svg>
+        </div>
         <div class="brand-text">
-          <h1>Stream Skipper</h1>
-          <span class="version">v1.3.0</span>
+          <h1>HyperSkip</h1>
+          <span class="version">v1.4.0</span>
         </div>
       </div>
       <div id="statusBadge" class="status-badge active">Active</div>
@@ -23,7 +28,7 @@
     <!-- Master Switch Card -->
     <div class="card master-card">
       <div class="card-info">
-        <span class="card-title">Ad Skipper & Blocker</span>
+        <span class="card-title">Ad Fast-Forward & Skipper</span>
         <span class="card-sub" id="masterStatusText">Accelerating & skipping in-video ads</span>
       </div>
       <label class="switch">
@@ -35,14 +40,24 @@
     <!-- Statistics Section -->
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon">🎯</div>
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-value" id="adsSkippedCount">0</div>
           <div class="stat-label">Ads Skipped</div>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">⏱️</div>
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-value" id="timeSavedCount">0s</div>
           <div class="stat-label">Time Saved</div>

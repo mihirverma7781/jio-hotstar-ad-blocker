@@ -54,15 +54,15 @@ body {
 }
 
 .logo-icon {
-  width: 34px;
-  height: 34px;
-  background: linear-gradient(135deg, #2563eb, #06b6d4);
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  background: #182234;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  color: #38bdf8;
 }
 
 .brand-text h1 {
@@ -89,10 +89,9 @@ body {
 }
 
 .status-badge.active {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.12);
   color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.3);
-  box-shadow: 0 0 10px var(--success-glow);
+  border: 1px solid rgba(52, 211, 153, 0.35);
 }
 
 .status-badge.paused {
@@ -109,14 +108,18 @@ body {
   padding: 12px 14px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .master-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(15, 23, 42, 0.8));
+  background: #131b2c;
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
@@ -155,14 +158,24 @@ body {
 }
 
 .stat-icon {
-  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #38bdf8;
+  flex-shrink: 0;
 }
 
 .stat-value {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
   color: #fff;
   letter-spacing: -0.3px;
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-label {

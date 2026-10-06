@@ -49,30 +49,31 @@ body {
   position: relative;
 }
 
-/* Ambient Background Glows */
+/* Subtle Background Lighting */
 .ambient-glow {
   position: absolute;
   border-radius: 50%;
-  filter: blur(140px);
+  filter: blur(120px);
   pointer-events: none;
   z-index: 0;
+  opacity: 0.35;
 }
 
 .glow-top {
-  top: -120px;
+  top: -100px;
   left: 50%;
   transform: translateX(-50%);
-  width: 650px;
-  height: 450px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.22), rgba(6, 182, 212, 0.1), transparent 70%);
+  width: 500px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent 70%);
 }
 
 .glow-middle {
   top: 1400px;
-  right: -100px;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.15), rgba(59, 130, 246, 0.08), transparent 70%);
+  right: -50px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent 70%);
 }
 
 .container {
@@ -83,11 +84,12 @@ body {
   z-index: 1;
 }
 
-/* Gradient Text */
-.gradient-text {
-  background: linear-gradient(135deg, #60a5fa, #38bdf8, #34d399);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Highlight & Accent Text */
+.gradient-text,
+.highlight-text {
+  color: #38bdf8;
+  background: none;
+  -webkit-text-fill-color: initial;
 }
 
 /* Navbar */
