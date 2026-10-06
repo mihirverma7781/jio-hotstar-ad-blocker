@@ -439,13 +439,23 @@ body {
   position: relative;
   width: 100%;
   height: 380px;
-  background: radial-gradient(circle at center, #1e293b, #090d16);
+  background: radial-gradient(circle at center, #111827, #06080e);
   border-radius: var(--radius-md);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.demo-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .demo-video-content {
