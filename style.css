@@ -7,7 +7,7 @@
 
 :root {
   /* Notion Paper & Ink Core Palette */
-  --canvas: #fbfbfa;           /* Notion paper canvas */
+  --canvas: #ffffff;           /* Pure white canvas */
   --canvas-pure: #ffffff;      /* Pure paper sheet */
   --surface: #f7f6f5;          /* Notion surface tint */
   --surface-hover: #efeeeb;    /* Subtle hover tint */
@@ -689,33 +689,38 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* Notion Pastel Card Tints */
-.bento-card:nth-child(1) {
+/* Crisp Notion White Card Style with Property Tint Icon Accents */
+.bento-card {
+  background-color: var(--canvas-pure);
+  border: 1px solid var(--hairline);
+}
+
+.bento-card:nth-child(1) .bento-icon {
   background-color: var(--tint-peach);
   border-color: var(--tint-peach-border);
 }
 
-.bento-card:nth-child(2) {
+.bento-card:nth-child(2) .bento-icon {
   background-color: var(--tint-mint);
   border-color: var(--tint-mint-border);
 }
 
-.bento-card:nth-child(3) {
+.bento-card:nth-child(3) .bento-icon {
   background-color: var(--tint-rose);
   border-color: var(--tint-rose-border);
 }
 
-.bento-card:nth-child(4) {
+.bento-card:nth-child(4) .bento-icon {
   background-color: var(--tint-yellow);
   border-color: var(--tint-yellow-border);
 }
 
-.bento-card:nth-child(5) {
+.bento-card:nth-child(5) .bento-icon {
   background-color: var(--tint-sky);
   border-color: var(--tint-sky-border);
 }
 
-.bento-card:nth-child(6) {
+.bento-card:nth-child(6) .bento-icon {
   background-color: var(--tint-lavender);
   border-color: var(--tint-lavender-border);
 }
@@ -921,13 +926,14 @@ body {
 }
 
 .install-cta-box {
-  background: var(--surface);
+  background: var(--canvas-pure);
   border: 1px solid var(--hairline-strong);
   border-radius: var(--radius-md);
   padding: 36px;
   text-align: center;
   max-width: 680px;
   margin: 0 auto;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
 }
 
 .install-cta-box h3 {
