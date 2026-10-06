@@ -732,14 +732,24 @@ body {
 .bento-icon {
   width: 32px;
   height: 32px;
-  background: var(--canvas-pure);
+  background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
   margin-bottom: 14px;
+  color: var(--ink-black);
+  transition: transform 0.2s ease;
+}
+
+.bento-icon svg {
+  display: block;
+  stroke: var(--ink-black);
+}
+
+.bento-card:hover .bento-icon {
+  transform: scale(1.06);
 }
 
 .bento-card h3 {
