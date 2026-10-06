@@ -1075,11 +1075,29 @@ body {
   margin-bottom: 32px;
 }
 
+.footer-brand-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.footer-icon-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--ink-deep);
+  color: #ffffff;
+  border-radius: var(--radius-xs);
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
 .footer-brand .brand-logo {
   font-size: 16px;
   font-weight: 600;
   color: var(--ink-deep);
-  margin-bottom: 4px;
 }
 
 .footer-brand p {
