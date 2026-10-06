@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" fill="none">
+  <!-- Precision Titanium Background -->
+  <rect width="128" height="128" rx="28" fill="#090A0C"/>
+  <rect x="1" y="1" width="126" height="126" rx="27" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2"/>
+  
+  <!-- Subtle Interior Grid Frame -->
+  <line x1="64" y1="18" x2="64" y2="110" stroke="rgba(255, 255, 255, 0.04)" stroke-width="1"/>
+  <line x1="18" y1="64" x2="110" y2="64" stroke="rgba(255, 255, 255, 0.04)" stroke-width="1"/>
+  
+  <!-- Primary Acceleration Chevrons (Dual Fast-Forward) -->
+  <!-- Left Chevron -->
+  <path d="M34 40 L58 64 L34 88" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Right Chevron -->
+  <path d="M58 40 L82 64 L58 88" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Right Velocity Vertical Bar (Skip Point) -->
+  <line x1="94" y1="42" x2="94" y2="86" stroke="#22C55E" stroke-width="6" stroke-linecap="round"/>
+</svg>

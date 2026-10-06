@@ -3,169 +3,180 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hotstar & Prime Video Skipper</title>
+  <title>HyperSkip — Playback Acceleration</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
+  <div class="shell">
+    <!-- Precision Machined Header -->
     <header class="header">
       <div class="brand">
-        <div class="logo-icon">⚡</div>
-        <div class="brand-text">
-          <h1>Stream Skipper</h1>
-          <span class="version">v1.3.0</span>
+        <div class="brand-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="7 5 13 12 7 19"></polyline>
+            <polyline points="13 5 19 12 13 19"></polyline>
+            <line x1="21" y1="5" x2="21" y2="19" stroke="#22c55e" stroke-width="2"></line>
+          </svg>
+        </div>
+        <div class="brand-meta">
+          <span class="brand-title">HyperSkip</span>
+          <span class="brand-version">v1.4.0</span>
         </div>
       </div>
-      <div id="statusBadge" class="status-badge active">Active</div>
+      <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span id="statusBadge" class="status-text">ENGAGED</span>
+      </div>
     </header>
 
-    <!-- Master Switch Card -->
-    <div class="card master-card">
-      <div class="card-info">
-        <span class="card-title">Ad Skipper & Blocker</span>
-        <span class="card-sub" id="masterStatusText">Accelerating & skipping in-video ads</span>
+    <!-- Master Switchboard Card -->
+    <section class="module master-module">
+      <div class="module-body">
+        <div class="module-label">ACCELERATION ENGINE</div>
+        <div class="module-value" id="masterStatusText">16x Fast-Forward & Audio Mute</div>
       </div>
-      <label class="switch">
+      <label class="switch" aria-label="Toggle Ad Skipper">
         <input type="checkbox" id="toggleEnabled" checked>
         <span class="slider"></span>
       </label>
-    </div>
+    </section>
 
-    <!-- Statistics Section -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">🎯</div>
-        <div class="stat-content">
-          <div class="stat-value" id="adsSkippedCount">0</div>
-          <div class="stat-label">Ads Skipped</div>
-        </div>
+    <!-- Telemetry Metering Block -->
+    <div class="telemetry-grid">
+      <div class="telemetry-cell">
+        <div class="telemetry-label">SKIPPED</div>
+        <div class="telemetry-value" id="adsSkippedCount">0</div>
+        <div class="telemetry-unit">COMMERCIALS</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon">⏱️</div>
-        <div class="stat-content">
-          <div class="stat-value" id="timeSavedCount">0s</div>
-          <div class="stat-label">Time Saved</div>
-        </div>
+      <div class="telemetry-cell">
+        <div class="telemetry-label">TIME SAVED</div>
+        <div class="telemetry-value" id="timeSavedCount">0s</div>
+        <div class="telemetry-unit">STREAM DURATION</div>
       </div>
     </div>
 
-    <!-- Features & Settings -->
-    <div class="section-title">Playback Acceleration</div>
+    <!-- Rate Selection Segment -->
+    <div class="section-divider">
+      <span>VELOCITY SELECTOR</span>
+    </div>
 
-    <div class="card setting-card">
-      <div class="card-info">
-        <span class="card-title">Fast-Forward Speed</span>
-        <span class="card-sub">Speed multiplier during detected ads</span>
+    <div class="control-row">
+      <div class="control-label-group">
+        <span class="control-title">Max Ad Speed</span>
+        <span class="control-desc">Hardware playback multiplier</span>
       </div>
-      <div class="speed-selector">
-        <button type="button" class="speed-btn" data-speed="4">4x</button>
-        <button type="button" class="speed-btn" data-speed="8">8x</button>
-        <button type="button" class="speed-btn active" data-speed="16">16x</button>
+      <div class="segmented-control" role="group" aria-label="Playback Speed">
+        <button type="button" class="segment-btn" data-speed="4">4x</button>
+        <button type="button" class="segment-btn" data-speed="8">8x</button>
+        <button type="button" class="segment-btn active" data-speed="16">16x</button>
       </div>
     </div>
 
-    <div class="section-title">Automation & Audio</div>
+    <!-- Toggles List -->
+    <div class="section-divider">
+      <span>AUTOMATION RULES</span>
+    </div>
 
-    <div class="settings-list">
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Auto-Mute Ads</span>
-          <span class="setting-desc">Mutes ad audio and restores original volume</span>
+    <div class="stack-list">
+      <div class="stack-item">
+        <div class="stack-info">
+          <span class="stack-title">Commercial Audio Mute</span>
+          <span class="stack-desc">Silences commercials, restores on resume</span>
         </div>
-        <label class="switch">
+        <label class="switch" aria-label="Auto-Mute Ads">
           <input type="checkbox" id="toggleAutoMute" checked>
           <span class="slider"></span>
         </label>
       </div>
 
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Auto-Click "Skip" Buttons</span>
-          <span class="setting-desc">Instantly clicks Skip Ad buttons when clickable</span>
+      <div class="stack-item">
+        <div class="stack-info">
+          <span class="stack-title">Instant Skip Cues</span>
+          <span class="stack-desc">Dispatches click on "Skip Ad" millisecond-zero</span>
         </div>
-        <label class="switch">
+        <label class="switch" aria-label="Auto-Click Skip Buttons">
           <input type="checkbox" id="toggleAutoSkipButtons" checked>
           <span class="slider"></span>
         </label>
       </div>
 
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Instant Seek</span>
-          <span class="setting-desc">Jumps directly past seekable ad clips</span>
+      <div class="stack-item">
+        <div class="stack-info">
+          <span class="stack-title">Skip Intros & Recaps</span>
+          <span class="stack-desc">Auto-clicks "Skip Intro" & "Skip Recap"</span>
         </div>
-        <label class="switch">
-          <input type="checkbox" id="toggleInstantSeek" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Blur / Dim Ad Video</span>
-          <span class="setting-desc">Hides disruptive visuals with a sleek veil</span>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="toggleBlurAdVideo" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Skip Intros & Recaps</span>
-          <span class="setting-desc">Auto-clicks "Skip Intro" & "Skip Recap"</span>
-        </div>
-        <label class="switch">
+        <label class="switch" aria-label="Skip Intros">
           <input type="checkbox" id="toggleSkipIntros" checked>
           <span class="slider"></span>
         </label>
       </div>
 
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Block In-App Banners</span>
-          <span class="setting-desc">Hides billboard ads, companion promos & upgrade prompts</span>
+      <div class="stack-item">
+        <div class="stack-info">
+          <span class="stack-title">Timeline Instant Seek</span>
+          <span class="stack-desc">Snaps directly to end of seekable pre-rolls</span>
         </div>
-        <label class="switch">
+        <label class="switch" aria-label="Instant Seek">
+          <input type="checkbox" id="toggleInstantSeek" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="stack-item">
+        <div class="stack-info">
+          <span class="stack-title">Ad Visual Veil</span>
+          <span class="stack-desc">Discreetly obscures loud commercial video</span>
+        </div>
+        <label class="switch" aria-label="Blur Video">
+          <input type="checkbox" id="toggleBlurAdVideo" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="stack-item">
+        <div class="stack-info">
+          <span class="stack-title">Purge Ad CDN Slots</span>
+          <span class="stack-desc">Suppresses third-party tracking iframes & CDN assets</span>
+        </div>
+        <label class="switch" aria-label="Block In-App Banners">
           <input type="checkbox" id="toggleRemoveWebappAds" checked>
           <span class="slider"></span>
         </label>
       </div>
     </div>
 
-    <!-- Screen Sharing & Presentation Mode -->
-    <div class="section-title">Screen Sharing & Presentation</div>
-    <div class="settings-list">
-      <div class="setting-row">
-        <div class="setting-info">
-          <span class="setting-title">Presenter Mode</span>
-          <span class="setting-desc">Suppresses HUD badges & visual filters during Meet/Teams shares</span>
+    <!-- Presentation Mode Section -->
+    <div class="section-divider">
+      <span>SCREEN SHARING</span>
+    </div>
+
+    <div class="stack-list">
+      <div class="stack-item">
+        <div class="stack-info">
+          <span class="stack-title">Presenter Clean Mode</span>
+          <span class="stack-desc">Hides telemetry HUD badges during screen share</span>
         </div>
-        <label class="switch">
+        <label class="switch" aria-label="Presenter Mode">
           <input type="checkbox" id="togglePresenterMode">
           <span class="slider"></span>
         </label>
       </div>
     </div>
 
-    <!-- Educational DRM Screen Sharing Card -->
-    <div class="card info-card">
-      <div class="info-header">
-        <span class="info-icon">ℹ️</span>
-        <span class="info-title">Why Video Appears Black in Screen Shares</span>
-      </div>
-      <p class="info-text">
-        Hardware DRM (Widevine/HDCP) and OS secure surfaces intentionally mask protected video frames from capture tools (Google Meet, Teams, Zoom). This is enforced by your browser and GPU drivers to protect copyrighted media. Presenter Mode provides a clean, clutter-free tab for your meetings.
+    <div class="drm-note">
+      <div class="drm-title">PROTECTED PIPELINE NOTICE</div>
+      <p class="drm-text">
+        Hardware DRM (Widevine/HDCP) naturally conceals video surfaces in meeting shares. HyperSkip operates strictly within userland parameters without compromising DRM security.
       </p>
     </div>
 
-    <!-- Footer Actions -->
+    <!-- Footer Terminal Controls -->
     <footer class="footer">
-      <button id="btnResetStats" class="btn-secondary">Reset</button>
-      <a href="https://www.hotstar.com" target="_blank" class="btn-primary">Hotstar ↗</a>
-      <a href="https://www.primevideo.com" target="_blank" class="btn-primary">Prime ↗</a>
+      <button id="btnResetStats" class="btn-terminal" type="button">RESET COUNTER</button>
+      <div class="footer-links">
+        <a href="https://www.hotstar.com" target="_blank" class="nav-target" rel="noopener">Hotstar ↗</a>
+        <a href="https://www.primevideo.com" target="_blank" class="nav-target" rel="noopener">Prime ↗</a>
+      </div>
     </footer>
   </div>
 
