@@ -327,10 +327,16 @@ body {
   color: var(--ink-secondary);
 }
 
-/* Hero Showcase Frame */
+/* Hero Showcase Frame with Notion Paper Elevation & Gentle Float Animation */
 .hero-showcase {
   width: 100%;
   max-width: 920px;
+  animation: gentleFloat 6s ease-in-out infinite alternate;
+}
+
+@keyframes gentleFloat {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-6px); }
 }
 
 .hero-image-wrapper {
@@ -339,12 +345,19 @@ body {
   overflow: hidden;
   border: 1px solid var(--hairline-strong);
   background: var(--canvas-pure);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.hero-image-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.09);
 }
 
 .hero-img {
   width: 100%;
   display: block;
+  transition: transform 0.4s ease;
 }
 
 .hero-hud-preview {
@@ -362,10 +375,23 @@ body {
   font-size: 12px;
   font-weight: 600;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  animation: pulseBadge 3s ease-in-out infinite;
+}
+
+@keyframes pulseBadge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
 }
 
 .hud-lightning {
   color: var(--ink-black);
+  animation: rotateLightning 4s ease-in-out infinite alternate;
+  display: inline-block;
+}
+
+@keyframes rotateLightning {
+  0% { transform: rotate(-8deg); }
+  100% { transform: rotate(8deg); }
 }
 
 .hud-badge {
@@ -650,7 +676,7 @@ body {
   border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
   padding: 24px;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -658,7 +684,9 @@ body {
 }
 
 .bento-card:hover {
+  transform: translateY(-2px);
   border-color: var(--hairline-strong);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* Notion Pastel Card Tints */
@@ -823,7 +851,13 @@ body {
   overflow: hidden;
   border: 1px solid var(--hairline-strong);
   background: var(--canvas-pure);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.showcase-image-wrapper:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
 }
 
 .showcase-img {
