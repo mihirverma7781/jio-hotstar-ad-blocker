@@ -1061,23 +1061,21 @@ body {
   line-height: 1.55;
 }
 
-/* Footer */
+/* Footer - Multi-Column Notion Layout */
 .footer {
-  border-top: 1px solid var(--hairline);
-  padding: 50px 0 30px 0;
+  border-top: 1px solid var(--hairline-strong);
+  padding: 48px 0 28px;
   background: var(--canvas);
 }
 
 .footer-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 32px;
 }
 
-.brand-logo {
+.footer-brand .brand-logo {
   font-size: 16px;
   font-weight: 600;
   color: var(--ink-deep);
@@ -1085,29 +1083,45 @@ body {
 }
 
 .footer-brand p {
-  color: var(--steel);
-  font-size: 13px;
-}
-
-.footer-links {
-  display: flex;
-  gap: 20px;
-}
-
-.footer-links a {
   color: var(--slate);
-  text-decoration: none;
   font-size: 13px;
+  margin-top: 6px;
+  max-width: 380px;
+  line-height: 1.5;
+}
+
+.footer-col-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--steel);
+  margin-bottom: 12px;
+}
+
+.footer-col-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-col-links a {
+  color: var(--slate);
+  font-size: 13px;
+  text-decoration: none;
   transition: color 0.15s ease;
 }
 
-.footer-links a:hover {
+.footer-col-links a:hover {
   color: var(--ink-deep);
 }
 
-.footer-bottom p {
-  color: var(--steel);
+.footer-bottom {
+  padding-top: 20px;
+  border-top: 1px solid var(--hairline);
+  text-align: center;
   font-size: 12px;
+  color: var(--steel);
 }
 
 /* Responsive */
