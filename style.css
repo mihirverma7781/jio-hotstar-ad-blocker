@@ -1124,12 +1124,248 @@ body {
   color: var(--steel);
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .hero-title { font-size: 36px; }
-  .bento-grid { grid-template-columns: 1fr; }
-  .bento-card-large { grid-column: span 1; }
-  .showcase-container { grid-template-columns: 1fr; }
-  .steps-grid { grid-template-columns: 1fr; }
-  .nav-links { display: none; }
+/* ==========================================================================
+   Notion-Style Loading Screen Overlay & Keyframes
+   ========================================================================== */
+
+.notion-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s ease;
+}
+
+.notion-loader.loaded {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.loader-book {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.loader-cover {
+  color: var(--ink-deep);
+  animation: bookPulse 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes bookPulse {
+  0% { transform: scale(0.92); opacity: 0.8; }
+  100% { transform: scale(1.05); opacity: 1; }
+}
+
+.loader-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.loader-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-deep);
+  letter-spacing: -0.2px;
+}
+
+.loader-sub {
+  font-size: 12px;
+  color: var(--steel);
+  font-family: var(--font-mono);
+}
+
+.loader-bar-track {
+  width: 140px;
+  height: 3px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.loader-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  background: var(--ink-deep);
+  border-radius: var(--radius-full);
+  animation: notionBarSlide 1.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes notionBarSlide {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(180%); }
+  100% { transform: translateX(350%); }
+}
+
+/* ==========================================================================
+   Comprehensive Responsive System (Mobile, Tablet, Desktop)
+   ========================================================================== */
+
+/* Tablet & Mobile Breakpoints */
+@media (max-width: 960px) {
+  .hero-section {
+    padding-top: 100px;
+    padding-bottom: 60px;
+  }
+
+  .hero-title {
+    font-size: 38px;
+    letter-spacing: -0.8px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+    padding: 0 12px;
+  }
+
+  .bento-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .bento-card-large {
+    grid-column: span 1;
+  }
+
+  .showcase-container {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    text-align: center;
+  }
+
+  .showcase-list {
+    text-align: left;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    height: 56px;
+  }
+
+  .nav-links {
+    display: none; /* Collapsed for clean mobile view */
+  }
+
+  .nav-actions .btn-github {
+    display: none; /* Keep primary CTA prominent */
+  }
+
+  .hero-cta-group {
+    flex-direction: column;
+    width: 100%;
+    max-width: 320px;
+    gap: 10px;
+  }
+
+  .btn-hero-primary,
+  .btn-hero-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .demo-screen {
+    height: 280px;
+  }
+
+  .demo-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-demo-trigger {
+    width: 100%;
+    text-align: center;
+  }
+
+  .demo-stats {
+    justify-content: space-around;
+    width: 100%;
+  }
+
+  .install-cta-box {
+    padding: 28px 20px;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cta-buttons .btn {
+    width: 100%;
+  }
+
+  .platforms-list {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 30px;
+    letter-spacing: -0.5px;
+  }
+
+  .hero-badge {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  .demo-player-box {
+    padding: 10px;
+  }
+
+  .bento-card {
+    padding: 20px;
+  }
+
+  .bento-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .demo-screen {
+    height: 230px;
+  }
 }

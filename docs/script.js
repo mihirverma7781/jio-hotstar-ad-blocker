@@ -5,6 +5,22 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Notion Loader Dismissal
+  const notionLoader = document.getElementById('notionLoader');
+  if (notionLoader) {
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        notionLoader.classList.add('loaded');
+      }, 450);
+    });
+    // Fallback if load already fired or takes longer
+    setTimeout(() => {
+      if (!notionLoader.classList.contains('loaded')) {
+        notionLoader.classList.add('loaded');
+      }
+    }, 1200);
+  }
+
   // DOM Elements
   const btnSimulateAd = document.getElementById('btnSimulateAd');
   const demoContent = document.getElementById('demoContent');

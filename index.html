@@ -13,6 +13,31 @@
 </head>
 <body>
 
+  <!-- Notion-Style Loading Screen -->
+  <div id="notionLoader" class="notion-loader">
+    <div class="loader-content">
+      <div class="loader-book">
+        <div class="loader-cover">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="13 17 18 12 13 7"></polyline>
+            <polyline points="6 17 11 12 6 7"></polyline>
+          </svg>
+        </div>
+        <div class="loader-pages">
+          <span class="page-flip"></span>
+          <span class="page-flip"></span>
+        </div>
+      </div>
+      <div class="loader-text">
+        <span class="loader-title">HyperSkip</span>
+        <span class="loader-sub">Preparing workspace...</span>
+      </div>
+      <div class="loader-bar-track">
+        <div class="loader-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Header Navigation -->
   <nav class="navbar">
     <div class="nav-container">
@@ -386,22 +411,30 @@
     <div class="container">
       <div class="footer-container">
         <div class="footer-brand">
-          <div class="brand-logo">HyperSkip</div>
-          <p>Accelerating playback to 16x during ads, auto-muting commercials, and auto-clicking skip buttons.</p>
+          <div class="footer-brand-title">
+            <div class="footer-icon-mark">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="13 17 18 12 13 7"></polyline>
+                <polyline points="6 17 11 12 6 7"></polyline>
+              </svg>
+            </div>
+            <span class="brand-logo">HyperSkip</span>
+          </div>
+          <p class="footer-desc">The open-source ad fast-forward engine for uninterrupted streaming on Disney+ Hotstar and Amazon Prime Video.</p>
         </div>
         <div>
-          <div class="footer-col-title">Project</div>
+          <div class="footer-col-title">Open Source</div>
           <div class="footer-col-links">
-            <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker" target="_blank">GitHub Repository</a>
-            <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker/releases" target="_blank">Releases & Changelog</a>
-            <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker/issues" target="_blank">Report Issue</a>
+            <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker" target="_blank">GitHub Repository ↗</a>
+            <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker/releases" target="_blank">Releases &amp; Notes</a>
+            <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker/issues" target="_blank">Bug Tracker</a>
           </div>
         </div>
         <div>
-          <div class="footer-col-title">Streaming</div>
+          <div class="footer-col-title">Platforms</div>
           <div class="footer-col-links">
             <a href="https://www.hotstar.com" target="_blank">Disney+ Hotstar</a>
-            <a href="https://www.primevideo.com" target="_blank">Amazon Prime Video</a>
+            <a href="https://www.primevideo.com" target="_blank">Prime Video</a>
             <a href="https://www.jiocinema.com" target="_blank">JioCinema</a>
           </div>
         </div>
