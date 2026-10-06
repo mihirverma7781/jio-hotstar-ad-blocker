@@ -1,9 +1,10 @@
 /**
- * HyperSkip — Interactive Landing Simulator
- * Telemetry animation, fast-forward scrubber, and real-time state machine.
+ * JioHotstar Ad Skipper - Landing Page Interactive Script
+ * Powers the real-time ad bypass simulator and micro-interactions.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Demo Elements
   const btnSimulateAd = document.getElementById('btnSimulateAd');
   const demoContent = document.getElementById('demoContent');
   const demoAdLayer = document.getElementById('demoAdLayer');
@@ -12,56 +13,62 @@ document.addEventListener('DOMContentLoaded', () => {
   const demoAdBadge = document.getElementById('demoAdBadge');
   const demoSkipBtn = document.getElementById('demoSkipBtn');
 
+  // Stats in Demo
   const demoStatus = document.getElementById('demoStatus');
   const demoSpeed = document.getElementById('demoSpeed');
   const demoAudio = document.getElementById('demoAudio');
 
   let isSimulationRunning = false;
+  let totalDemoSkipped = 0;
+  let totalDemoSeconds = 0;
 
+  // Simulate In-Video Ad Break
   btnSimulateAd.addEventListener('click', () => {
     if (isSimulationRunning) return;
     isSimulationRunning = true;
     btnSimulateAd.disabled = true;
 
-    // 1. Commercial break cues detected
-    demoStatus.textContent = 'COMMERCIAL DETECTED // 16x';
-    demoStatus.style.color = '#f59e0b'; // Amber telemetry cue
+    // 1. Ad Starts
+    demoStatus.textContent = 'Ad Detected! Accelerating...';
+    demoStatus.className = 'demo-stat-val';
+    demoStatus.style.color = '#f59e0b'; // Amber warning
 
-    demoSpeed.textContent = '16.0x VELOCITY';
-    demoSpeed.style.color = '#ffffff';
+    demoSpeed.textContent = '16.0x (Hyper-Speed)';
+    demoSpeed.style.color = '#38bdf8';
 
-    demoAudio.textContent = 'MUTED // ATTENUATED';
-    demoAudio.style.color = '#606973';
+    demoAudio.textContent = 'Muted (Silenced) 🔇';
+    demoAudio.style.color = '#94a3b8';
     demoAudioBars.classList.add('muted');
 
     demoContent.classList.add('blurred');
     demoAdLayer.classList.add('active');
     demoProgress.classList.add('ad-active');
 
+    // Countdown animation simulation at 16x speed
     let secondsLeft = 15;
     demoAdBadge.textContent = `Ad · 00:${secondsLeft < 10 ? '0' : ''}${secondsLeft}`;
 
-    let progressScale = 0.35;
+    let progressWidth = 30;
 
     const interval = setInterval(() => {
       secondsLeft -= 3;
-      progressScale += 0.13;
-      demoProgress.style.transform = `scaleX(${Math.min(progressScale, 1)})`;
+      progressWidth += 14;
+      demoProgress.style.width = `${Math.min(progressWidth, 100)}%`;
 
       if (secondsLeft > 0) {
         demoAdBadge.textContent = `Ad · 00:${secondsLeft < 10 ? '0' : ''}${secondsLeft}`;
       }
 
-      // Fast automated skip trigger
+      // Halfway: Auto-click skip button
       if (secondsLeft <= 6) {
         demoSkipBtn.classList.add('clicked');
-        demoSkipBtn.textContent = 'DISPATCHED ✓';
+        demoSkipBtn.textContent = 'Skipped! ✓';
       }
 
       if (secondsLeft <= 0) {
         clearInterval(interval);
 
-        // 2. Commercial break concluded -> Reference stream restored
+        // 2. Ad Finished -> Restore normal playback
         setTimeout(() => {
           demoAdLayer.classList.remove('active');
           demoContent.classList.remove('blurred');
@@ -69,32 +76,37 @@ document.addEventListener('DOMContentLoaded', () => {
           demoProgress.classList.remove('ad-active');
           demoSkipBtn.classList.remove('clicked');
           demoSkipBtn.textContent = 'Skip Ad ❯';
-          demoProgress.style.transform = 'scaleX(0.35)';
+          demoProgress.style.width = '35%';
 
-          demoStatus.textContent = 'READY // MONITORING';
-          demoStatus.style.color = '#22c55e'; // Emerald laser
-          demoSpeed.textContent = '1.0x';
-          demoSpeed.style.color = '#ffffff';
-          demoAudio.textContent = 'ACTIVE // 0.0dB';
-          demoAudio.style.color = '#ffffff';
+          demoStatus.textContent = 'Content Restored ⚡';
+          demoStatus.className = 'demo-stat-val val-green';
+          demoSpeed.textContent = '1.0x (Normal)';
+          demoSpeed.style.color = '#fff';
+          demoAudio.textContent = 'Unmuted 🔊';
+          demoAudio.style.color = '#34d399';
+
+          totalDemoSkipped++;
+          totalDemoSeconds += 15;
 
           isSimulationRunning = false;
           btnSimulateAd.disabled = false;
-        }, 280);
+        }, 300);
       }
-    }, 180); // 15s commercial finishes in ~1.1 seconds
+    }, 200); // 15s ad completes in ~1 second!
   });
 
-  // Code Terminal Click-to-Copy
-  const codeTerminal = document.querySelector('.code-terminal');
-  if (codeTerminal) {
-    codeTerminal.addEventListener('click', () => {
-      const text = codeTerminal.textContent.trim();
+  // Code Box Click-to-Copy
+  const codeBox = document.querySelector('.code-box');
+  if (codeBox) {
+    codeBox.style.cursor = 'pointer';
+    codeBox.title = 'Click to copy';
+    codeBox.addEventListener('click', () => {
+      const text = codeBox.querySelector('code').textContent;
       navigator.clipboard.writeText(text).then(() => {
-        const original = codeTerminal.innerHTML;
-        codeTerminal.innerHTML = '<code style="color: #22c55e;">COPIED TO CLIPBOARD ✓</code>';
+        const originalText = codeBox.innerHTML;
+        codeBox.innerHTML = '<code>✓ Copied to clipboard!</code>';
         setTimeout(() => {
-          codeTerminal.innerHTML = original;
+          codeBox.innerHTML = originalText;
         }, 1800);
       });
     });

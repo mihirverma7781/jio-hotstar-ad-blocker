@@ -3,173 +3,140 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HyperSkip — High-Velocity Playback Automation for JioHotstar & Prime Video</title>
-  <meta name="description" content="Precision-engineered Chromium extension that automatically accelerates in-video commercials to 16x speed, mutes ad spikes, and clicks skip cues with zero DRM interference.">
-  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <title>JioHotstar & Prime Video Ad Skipper ⚡ Zero Ads. Pure Streaming.</title>
+  <meta name="description" content="Lightweight Chrome extension that fast-forwards in-video ads at 16x speed, auto-mutes commercials, and skips ads on JioHotstar and Amazon Prime Video.">
+  <link rel="icon" type="image/png" href="icons/icon32.png">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Precision Navigation Bar -->
+  <!-- Ambient Background Glows -->
+  <div class="ambient-glow glow-top"></div>
+  <div class="ambient-glow glow-middle"></div>
+
+  <!-- Header Navigation -->
   <nav class="navbar">
     <div class="nav-container">
       <a href="#" class="nav-brand">
-        <span class="brand-glyph">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="7 5 13 12 7 19"></polyline>
-            <polyline points="13 5 19 12 13 19"></polyline>
-            <line x1="21" y1="5" x2="21" y2="19" stroke="#22c55e" stroke-width="2"></line>
-          </svg>
-        </span>
-        <span class="brand-title">HyperSkip</span>
+        <span class="brand-icon">⚡</span>
+        <span class="brand-name">Stream<span class="gradient-text">Skipper</span></span>
       </a>
-
       <div class="nav-links">
-        <a href="#simulator">Simulator</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#telemetry">Telemetry</a>
+        <a href="#features">Features</a>
+        <a href="#interactive-demo">Live Demo</a>
+        <a href="#how-it-works">How It Works</a>
         <a href="#installation">Installation</a>
         <a href="#faq">FAQ</a>
       </div>
-
       <div class="nav-actions">
-        <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker" target="_blank" rel="noopener" class="btn btn-ghost">
-          <svg class="icon-svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+        <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker" target="_blank" class="btn btn-github">
+          <svg class="github-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
             <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
           </svg>
-          <span>Source</span>
+          <span>Star on GitHub</span>
         </a>
-        <a href="#installation" class="btn btn-titanium">Get Extension</a>
+        <a href="#installation" class="btn btn-primary">Get Extension</a>
       </div>
     </div>
   </nav>
 
   <!-- Hero Section -->
-  <header class="hero-block">
-    <div class="container hero-layout">
-      <div class="hero-header-data">
-        <div class="spec-chip">
-          <span class="chip-indicator"></span>
-          <span class="chip-text">MANIFEST V3 • JIOHOTSTAR & PRIME VIDEO • ZERO DRM INTERFERENCE</span>
-        </div>
-
-        <h1 class="hero-heading">
-          High-velocity commercial skipping for streaming video.
-        </h1>
-
-        <p class="hero-lead">
-          HyperSkip accelerates in-video commercial interruptions to 16x native playback, mutes audio spikes, and triggers skip cues the exact millisecond they render — keeping encrypted media pipelines intact.
-        </p>
-
-        <div class="hero-cta-cluster">
-          <a href="#installation" class="btn btn-titanium btn-lg">
-            <span>Install Extension</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </a>
-          <a href="#simulator" class="btn btn-wire btn-lg">
-            <span>Launch Simulator</span>
-          </a>
-        </div>
+  <header class="hero-section">
+    <div class="container hero-container">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span>v1.3.0 • Hotstar & Prime Video • 16x Fast-Forward</span>
       </div>
 
-      <!-- Telemetry Dashboard Specimen -->
-      <div class="hero-telemetry-specimen">
-        <div class="terminal-frame">
-          <div class="terminal-bar">
-            <span class="terminal-title">HYPERSKIP ENGINE DIAGNOSTICS // V1.4.0</span>
-            <span class="terminal-state">STATUS: ENGAGED</span>
-          </div>
-          <div class="terminal-grid">
-            <div class="data-cell">
-              <span class="data-key">ACCELERATION</span>
-              <span class="data-num">16.0x</span>
-              <span class="data-sub">HTML5 NATIVE RATE</span>
-            </div>
-            <div class="data-cell">
-              <span class="data-key">AUDIO ISOLATION</span>
-              <span class="data-num">AUTO</span>
-              <span class="data-sub">SPIKE ATTENUATION</span>
-            </div>
-            <div class="data-cell">
-              <span class="data-key">OVERHEAD</span>
-              <span class="data-num">&lt;0.2%</span>
-              <span class="data-sub">CPU CYCLE PROFILE</span>
-            </div>
-            <div class="data-cell">
-              <span class="data-key">DRM PIPELINE</span>
-              <span class="data-num">CLEAN</span>
-              <span class="data-sub">WIDEVINE UNTOUCHED</span>
-            </div>
+      <h1 class="hero-title">
+        Stream Hotstar & Prime Video.<br>
+        <span class="gradient-text">Zero Ads. Zero Delays.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        The ultra-lightweight Chrome extension that accelerates in-video ads to <strong>16x speed</strong>, automatically silences commercial audio, auto-clicks skip buttons, and removes promo banners.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#installation" class="btn btn-hero-primary">
+          <span>Install Extension</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+        <a href="#interactive-demo" class="btn btn-hero-secondary">
+          <span>See Interactive Demo</span>
+          <span class="play-indicator">▶</span>
+        </a>
+      </div>
+
+      <!-- Hero Visual Showcase -->
+      <div class="hero-showcase">
+        <div class="hero-image-wrapper">
+          <img src="assets/hero.jpg" alt="JioHotstar Ad Skipper Cinema Experience" class="hero-img">
+          <div class="hero-hud-preview">
+            <span class="hud-lightning">⚡</span>
+            <span class="hud-text">Skipping Ad</span>
+            <span class="hud-badge">16x Max</span>
           </div>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Interactive Simulator Section -->
-  <section id="simulator" class="section-container">
+  <!-- Interactive Simulation Section -->
+  <section id="interactive-demo" class="demo-section">
     <div class="container">
-      <div class="section-title-wrap">
-        <div class="section-index">01 // LIVE LAB</div>
-        <h2 class="section-headline">Interactive Commercial Acceleration Simulator</h2>
-        <p class="section-subtext">Observe how HyperSkip isolates ad states, accelerates player velocity, and restores reference volume.</p>
+      <div class="section-header">
+        <span class="section-tag">Interactive Simulation</span>
+        <h2 class="section-title">See How It Bypasses Ads in Real-Time</h2>
+        <p class="section-subtitle">Click the trigger button below to simulate how the extension handles unskippable Hotstar ads.</p>
       </div>
 
-      <div class="simulator-deck">
-        <div class="deck-screen" id="demoScreen">
-          <!-- Active Stream Layer -->
-          <div class="stream-content" id="demoContent">
-            <div class="content-tag">
-              <span class="live-dot"></span>
-              <span>STREAM REFERENCE: 2160P HDR MASTER</span>
-            </div>
-            <div class="waveform-meter" id="demoAudioBars">
-              <span class="wave-col"></span>
-              <span class="wave-col"></span>
-              <span class="wave-col"></span>
-              <span class="wave-col"></span>
-              <span class="wave-col"></span>
-              <span class="wave-col"></span>
+      <div class="demo-player-box">
+        <div class="demo-screen" id="demoScreen">
+          <!-- Content State -->
+          <div class="demo-video-content" id="demoContent">
+            <div class="demo-movie-badge">🎬 Zack Snyder's Justice League</div>
+            <div class="demo-audio-bars" id="demoAudioBars">
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
             </div>
           </div>
 
-          <!-- Commercial State Overlay -->
-          <div class="ad-interruption-veil" id="demoAdLayer">
-            <div class="ad-id-stamp" id="demoAdBadge">Ad · 00:15</div>
-            <div class="ad-provider-tag">GO ADS FREE</div>
-            <div class="acceleration-stamp" id="demoHud">VELOCITY 16x // ACCELERATING</div>
-            <button class="skip-dispatch-btn" id="demoSkipBtn">Skip Ad ❯</button>
+          <!-- Ad Overlay State (Hidden by default) -->
+          <div class="demo-ad-layer" id="demoAdLayer">
+            <div class="demo-ad-badge" id="demoAdBadge">Ad · 00:15</div>
+            <div class="demo-go-free-btn">Go Ads free</div>
+            <div class="demo-hud" id="demoHud">⚡ Skipping Ad (16x)</div>
+            <button class="demo-skip-btn" id="demoSkipBtn">Skip Ad ❯</button>
           </div>
 
-          <!-- Linear Stream Scrubber -->
-          <div class="stream-scrubber">
-            <div class="scrubber-fill" id="demoProgress"></div>
+          <!-- Timeline scrubber -->
+          <div class="demo-timeline">
+            <div class="demo-progress" id="demoProgress"></div>
           </div>
         </div>
 
-        <div class="simulator-console">
-          <button class="btn btn-titanium btn-trigger" id="btnSimulateAd">
-            <span>TRIGGER UNSEEKABLE COMMERCIAL BREAK</span>
+        <div class="demo-controls">
+          <button class="btn btn-demo-trigger" id="btnSimulateAd">
+            <span>⚡ Simulate Hotstar Ad Break</span>
           </button>
-          
-          <div class="telemetry-readout">
-            <div class="readout-item">
-              <span class="readout-label">SYSTEM STATE</span>
-              <span class="readout-val" id="demoStatus">READY // MONITORING</span>
+          <div class="demo-stats">
+            <div class="demo-stat">
+              <span class="demo-stat-label">Skipper Status:</span>
+              <span class="demo-stat-val val-green" id="demoStatus">Active & Watching</span>
             </div>
-            <div class="readout-item">
-              <span class="readout-label">VELOCITY MULTIPLIER</span>
-              <span class="readout-val" id="demoSpeed">1.0x</span>
+            <div class="demo-stat">
+              <span class="demo-stat-label">Playback Speed:</span>
+              <span class="demo-stat-val" id="demoSpeed">1.0x</span>
             </div>
-            <div class="readout-item">
-              <span class="readout-label">AUDIO CHANNEL</span>
-              <span class="readout-val" id="demoAudio">ACTIVE // 0.0dB</span>
+            <div class="demo-stat">
+              <span class="demo-stat-label">Audio State:</span>
+              <span class="demo-stat-val" id="demoAudio">Unmuted 🔊</span>
             </div>
           </div>
         </div>
@@ -177,206 +144,221 @@
     </div>
   </section>
 
-  <!-- Engineering Architecture Bento -->
-  <section id="architecture" class="section-container border-top">
+  <!-- Features Bento Grid -->
+  <section id="features" class="features-section">
     <div class="container">
-      <div class="section-title-wrap">
-        <div class="section-index">02 // ARCHITECTURE</div>
-        <h2 class="section-headline">Engineered for absolute pipeline integrity</h2>
-        <p class="section-subtext">Built to bypass aggressive commercials without causing player hangs or DRM license renegotiations.</p>
+      <div class="section-header">
+        <span class="section-tag">Powerful Features</span>
+        <h2 class="section-title">Engineered for Seamless Entertainment</h2>
+        <p class="section-subtitle">Designed to eliminate every category of ad intrusion without breaking video streams or Widevine DRM.</p>
       </div>
 
-      <div class="matrix-grid">
-        <div class="matrix-tile matrix-tile-wide">
-          <div class="matrix-glyph">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-            </svg>
-          </div>
-          <h3 class="tile-headline">16.0x Native Hardware Playback</h3>
-          <p class="tile-body">The moment an in-stream ad break triggers, HyperSkip drives the HTML5 video element to its highest supported hardware rate (16x). A mandatory 30-second commercial concludes in under 1.9 seconds without timeline de-synchronization.</p>
-          <div class="tile-telemetry">
-            <span class="telemetry-stat">1.87s</span>
-            <span class="telemetry-caption">ELAPSED TIME PER 30-SECOND AD</span>
+      <div class="bento-grid">
+        <!-- Card 1: 16x Speed -->
+        <div class="bento-card bento-card-large">
+          <div class="bento-icon">⚡</div>
+          <h3>16x Hyper-Speed Acceleration</h3>
+          <p>The instant an in-video advertisement triggers, playback is accelerated to HTML5's maximum 16x speed. A grueling 30-second commercial finishes in approximately 1.8 seconds.</p>
+          <div class="bento-metric">
+            <span class="metric-num">~1.8s</span>
+            <span class="metric-sub">Average time spent per 30s ad</span>
           </div>
         </div>
 
-        <div class="matrix-tile">
-          <div class="matrix-glyph">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-              <line x1="23" y1="9" x2="17" y2="15"></line>
-              <line x1="17" y1="9" x2="23" y2="15"></line>
-            </svg>
-          </div>
-          <h3 class="tile-headline">Instantaneous Audio Attenuation</h3>
-          <p class="tile-body">Commercial breaks routinely violate broadcast loudness standards. HyperSkip clamps ad volume to zero the instant an ad cue arrives and restores master volume on reference content return.</p>
+        <!-- Card 2: Auto Mute -->
+        <div class="bento-card">
+          <div class="bento-icon">🔇</div>
+          <h3>Smart Auto-Mute & Restore</h3>
+          <p>Commercials are often mixed louder than content. The extension mutes audio the moment the ad begins and restores your previous volume the millisecond your show resumes.</p>
         </div>
 
-        <div class="matrix-tile">
-          <div class="matrix-glyph">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="5 4 15 12 5 20 5 4"></polygon>
-              <line x1="19" y1="5" x2="19" y2="19"></line>
-            </svg>
-          </div>
-          <h3 class="tile-headline">Millisecond Skip Dispatch</h3>
-          <p class="tile-body">Monitors DOM tree mutations with zero CPU spin to dispatch synthetic clicks on "Skip Ad", "Skip Intro", and "Skip Recap" within 16 milliseconds of rendering.</p>
+        <!-- Card 3: In-App Banners -->
+        <div class="bento-card">
+          <div class="bento-icon">🚫</div>
+          <h3>Billboard & Banner Purge</h3>
+          <p>Wipes out invasive homepage billboard banners, masthead ads, and companion promo cards so your Hotstar interface stays clean and clutter-free.</p>
         </div>
 
-        <div class="matrix-tile">
-          <div class="matrix-glyph">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-          </div>
-          <h3 class="tile-headline">Zero DRM/EME Monkey-Patching</h3>
-          <p class="tile-body">Unlike scripts that hook <code>fetch</code> or EME license exchanges (which trigger Widevine crashes and "Page Unresponsive" errors), HyperSkip operates strictly within userland parameters.</p>
+        <!-- Card 4: Auto Clicker -->
+        <div class="bento-card">
+          <div class="bento-icon">⏩</div>
+          <h3>Auto-Click Skip Ad Buttons</h3>
+          <p>Monitors the player and automatically clicks "Skip Ad", "Skip Intro", and "Skip Recap" the instant they become clickable.</p>
         </div>
 
-        <div class="matrix-tile matrix-tile-wide">
-          <div class="matrix-glyph">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
-            </svg>
+        <!-- Card 5: Widevine Safe -->
+        <div class="bento-card bento-card-large">
+          <div class="bento-icon">🛡️</div>
+          <h3>Widevine DRM & Manifest Safe</h3>
+          <p>Operates purely on HTML5 video elements without tampering with protected network chunks or DRM licenses. Zero buffering, zero playback errors, and zero "Page Unresponsive" crashes.</p>
+          <div class="bento-tags">
+            <span class="tag">Zero Buffering</span>
+            <span class="tag">No DRM Tampering</span>
+            <span class="tag">0% CPU Overhead</span>
           </div>
-          <h3 class="tile-headline">Multi-Platform Compatibility</h3>
-          <p class="tile-body">Designed for modern streaming architectures across JioHotstar (hotstar.com, jiocinema.com, jiostar.com) and Amazon Prime Video (primevideo.com, amazon.com, amazon.in). Operates smoothly across both DASH and HLS video pipelines.</p>
+        </div>
+
+        <!-- Card 6: Privacy First -->
+        <div class="bento-card">
+          <div class="bento-icon">🔒</div>
+          <h3>100% Private & Open Source</h3>
+          <p>Runs entirely inside your browser. No telemetry, no external ad servers, no account required. All code is public on GitHub.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Technical Telemetry & Specifications -->
-  <section id="telemetry" class="section-container border-top">
-    <div class="container">
-      <div class="spec-comparison-table">
-        <div class="spec-table-header">
-          <span class="spec-col col-feature">CAPABILITY / SPECIFICATION</span>
-          <span class="spec-col col-hyperskip">HYPERSKIP ENGINE</span>
-          <span class="spec-col col-standard">CONVENTIONAL AD-BLOCKERS</span>
-        </div>
-        <div class="spec-table-row">
-          <span class="spec-col col-feature">In-Stream Video Commercial Handling</span>
-          <span class="spec-col col-hyperskip stat-positive">16x Fast-Forward + Smart Mute</span>
-          <span class="spec-col col-standard stat-negative">Stream Blackout / Player Freeze</span>
-        </div>
-        <div class="spec-table-row">
-          <span class="spec-col col-feature">Widevine & PlayReady DRM Safety</span>
-          <span class="spec-col col-hyperskip stat-positive">100% Intact (Zero Network Hooking)</span>
-          <span class="spec-col col-standard stat-negative">Frequent License Key Failures</span>
-        </div>
-        <div class="spec-table-row">
-          <span class="spec-col col-feature">Skip Intro & Recap Automation</span>
-          <span class="spec-col col-hyperskip stat-positive">Supported (Instant Dispatch)</span>
-          <span class="spec-col col-standard stat-negative">Unsupported</span>
-        </div>
-        <div class="spec-table-row">
-          <span class="spec-col col-feature">Webapp Layout Integrity</span>
-          <span class="spec-col col-hyperskip stat-positive">Guaranteed (Zero Parent Collapsing)</span>
-          <span class="spec-col col-standard stat-negative">Often Collapses Full Page Containers</span>
-        </div>
-        <div class="spec-table-row">
-          <span class="spec-col col-feature">Execution Footprint</span>
-          <span class="spec-col col-hyperskip stat-positive">&lt; 15KB Runtime Memory</span>
-          <span class="spec-col col-standard stat-negative">&gt; 150MB Filter List Cache</span>
-        </div>
+  <!-- Extension Popup Showcase Section -->
+  <section class="showcase-section">
+    <div class="container showcase-container">
+      <div class="showcase-text">
+        <span class="section-tag">Customizable Control</span>
+        <h2>A Dashboard Tailored to Your Preference</h2>
+        <p>Fine-tune your streaming experience directly from the sleek dark-mode popup in your Chrome toolbar.</p>
+        <ul class="showcase-list">
+          <li><strong>Speed Multiplier:</strong> Switch between 16x (Fastest), 8x, or 4x playback.</li>
+          <li><strong>Audio Automation:</strong> Toggle auto-muting during commercial breaks.</li>
+          <li><strong>Visual Screen Veil:</strong> Apply a subtle blur and dim filter during ads.</li>
+          <li><strong>Live Counters:</strong> Monitor real-time counts of total ads skipped and time saved.</li>
+        </ul>
+      </div>
+      <div class="showcase-image-wrapper">
+        <img src="assets/control-panel.jpg" alt="Extension Control Panel Preview" class="showcase-img">
       </div>
     </div>
   </section>
 
   <!-- Installation Steps -->
-  <section id="installation" class="section-container border-top">
+  <section id="installation" class="install-section">
     <div class="container">
-      <div class="section-title-wrap">
-        <div class="section-index">03 // DEPLOYMENT</div>
-        <h2 class="section-headline">Install in 60 Seconds</h2>
-        <p class="section-subtext">Direct unpack deployment for Chromium browsers (Google Chrome, Brave, Arc, Edge, Opera).</p>
+      <div class="section-header">
+        <span class="section-tag">Quick Start</span>
+        <h2 class="section-title">Install in Under 60 Seconds</h2>
+        <p class="section-subtitle">Compatible with Google Chrome, Brave, Microsoft Edge, Opera, and Vivaldi.</p>
       </div>
 
-      <div class="install-pipeline">
-        <div class="pipeline-step">
-          <div class="step-badge">STEP 01</div>
-          <h3 class="step-title">Clone or Download Repository</h3>
-          <p class="step-desc">Obtain the codebase directly from GitHub to your local workstation.</p>
-          <div class="code-terminal">
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">01</div>
+          <h3>Download Codebase</h3>
+          <p>Clone the repository or download the ZIP from GitHub and extract it to your computer.</p>
+          <div class="code-box">
             <code>git clone https://github.com/mihirverma7781/jio-hotstar-ad-blocker.git</code>
           </div>
         </div>
 
-        <div class="pipeline-step">
-          <div class="step-badge">STEP 02</div>
-          <h3 class="step-title">Enable Developer Mode</h3>
-          <p class="step-desc">Open <code>chrome://extensions</code> in your browser and toggle the Developer mode switch in the upper-right corner.</p>
+        <div class="step-card">
+          <div class="step-number">02</div>
+          <h3>Open Extension Manager</h3>
+          <p>Navigate to <code>chrome://extensions</code> in your browser URL bar and toggle <strong>Developer mode</strong> in the top-right corner.</p>
         </div>
 
-        <div class="pipeline-step">
-          <div class="step-badge">STEP 03</div>
-          <h3 class="step-title">Load Unpacked Extension</h3>
-          <p class="step-desc">Click "Load unpacked" and select the repository root directory. HyperSkip will initialize and engage immediately.</p>
+        <div class="step-card">
+          <div class="step-number">03</div>
+          <h3>Load Unpacked</h3>
+          <p>Click the <strong>Load unpacked</strong> button and select the extracted project folder. You're ready to stream ad-free!</p>
         </div>
       </div>
 
-      <div class="dispatch-cluster">
-        <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker/archive/refs/heads/main.zip" class="btn btn-titanium btn-lg">
-          <span>Download Package (.zip)</span>
-        </a>
-        <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker" target="_blank" rel="noopener" class="btn btn-wire btn-lg">
-          <span>Inspect GitHub Repository ↗</span>
-        </a>
+      <div class="install-cta-box">
+        <h3>Ready for Uninterrupted Binge-Watching?</h3>
+        <p>Get the repository and experience true ad-free streaming on Hotstar.</p>
+        <div class="cta-buttons">
+          <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker/archive/refs/heads/main.zip" class="btn btn-primary btn-large">
+            <span>Download ZIP (.zip)</span>
+          </a>
+          <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker" target="_blank" class="btn btn-secondary btn-large">
+            <span>View Source on GitHub ↗</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supported Platforms -->
+  <section class="platforms-section">
+    <div class="container text-center">
+      <span class="section-tag">Compatibility</span>
+      <h2>Supported Platforms & Browsers</h2>
+      <div class="platforms-list">
+        <div class="platform-item">
+          <span class="platform-name">Disney+ Hotstar</span>
+          <span class="platform-domain">hotstar.com</span>
+        </div>
+        <div class="platform-item">
+          <span class="platform-name">JioCinema</span>
+          <span class="platform-domain">jiocinema.com</span>
+        </div>
+        <div class="platform-item">
+          <span class="platform-name">JioStar</span>
+          <span class="platform-domain">jiostar.com</span>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- FAQ Section -->
-  <section id="faq" class="section-container border-top">
-    <div class="container faq-narrow">
-      <div class="section-title-wrap">
-        <div class="section-index">04 // VERIFICATION</div>
-        <h2 class="section-headline">Frequently Answered Questions</h2>
+  <section id="faq" class="faq-section">
+    <div class="container faq-container">
+      <div class="section-header">
+        <span class="section-tag">Got Questions?</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
       </div>
 
-      <div class="faq-accordion">
-        <details class="faq-panel" open>
-          <summary class="faq-trigger">How does 16x acceleration differ from typical ad blocking?</summary>
-          <div class="faq-content">
-            <p>Traditional adblockers sever network connections to ad servers. On platforms like Hotstar and Prime Video that stitch ad segments directly into encrypted HLS/DASH media manifests, severing connections causes infinite buffering loops or media decoder errors. HyperSkip allows the stream to progress normally while multiplying HTML5 playback velocity by 16x and muting audio, completing a 30-second ad break in ~1.8 seconds.</p>
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary class="faq-question">How does 16x speed skipping work?</summary>
+          <div class="faq-answer">
+            <p>Hotstar uses server-guided and in-video ad streaming. When our detector recognizes the ad markers (such as the "Go Ads free" prompt or the countdown timer), it immediately applies HTML5's maximum native playback rate (16x) and silences audio. A standard 30-second commercial concludes in less than 2 seconds, and normal 1.0x playback resumes automatically.</p>
           </div>
         </details>
 
-        <details class="faq-panel">
-          <summary class="faq-trigger">Does this interfere with DRM or violate encryption standards?</summary>
-          <div class="faq-content">
-            <p>No. HyperSkip does not decrypt, alter, or intercept Widevine, PlayReady, or FairPlay data. It communicates exclusively with standard HTML5 Media Element properties (<code>playbackRate</code>, <code>muted</code>) in a secure, sandboxed context script.</p>
+        <details class="faq-item">
+          <summary class="faq-question">Does this tamper with Widevine DRM or cause buffering?</summary>
+          <div class="faq-answer">
+            <p>No. Unlike aggressive network interceptors that break encrypted streams or crash the player with "Page Unresponsive" errors, this extension operates purely as an HTML5 video controller in an isolated sandbox. It never touches DRM license keys or streaming chunks.</p>
           </div>
         </details>
 
-        <details class="faq-panel">
-          <summary class="faq-trigger">Why does screen-sharing in Google Meet or Microsoft Teams produce black video?</summary>
-          <div class="faq-content">
-            <p>Commercial streaming services enforce HDCP and OS-level secure video surfaces. The operating system GPU driver intentionally masks protected video planes from virtual capture buffers (Meet, Teams, Zoom). HyperSkip includes a Presenter Mode that suppresses on-screen indicators and HUD badges during work calls.</p>
+        <details class="faq-item">
+          <summary class="faq-question">Does it also remove homepage banners and billboard ads?</summary>
+          <div class="faq-answer">
+            <p>Yes. The extension includes cosmetic filtering and DeclarativeNetRequest rules that suppress top masthead billboards, video cards, companion ads, and subscription nudges.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">Why does video appear black when screen sharing in Meet, Teams, or Zoom?</summary>
+          <div class="faq-answer">
+            <p>Protected commercial streams use Encrypted Media Extensions (EME) and hardware-level Digital Rights Management (Widevine/HDCP). The operating system and GPU driver intentionally prevent screen capture tools from reading protected video frames, which results in a black video plane while player controls remain visible. The extension's <strong>Presenter Mode</strong> ensures your shared browser tab stays clean and free of extraneous HUD badges or filter glitches during meetings.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">Which browsers are supported?</summary>
+          <div class="faq-answer">
+            <p>Any Chromium-based browser supporting Manifest V3, including Google Chrome, Brave, Microsoft Edge, Opera, and Vivaldi.</p>
           </div>
         </details>
       </div>
     </div>
   </section>
 
-  <!-- Machined Footer -->
-  <footer class="footer-block">
-    <div class="container footer-layout">
-      <div class="footer-meta">
-        <div class="footer-title">HYPERSKIP // HIGH-VELOCITY PLAYBACK AUTOMATION</div>
-        <div class="footer-copy">MIT Licensed open-source utility. Maintained for precision media playback.</div>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="footer-brand">
+        <div class="brand-logo">⚡ JioHotstar Skipper</div>
+        <p>The modern, open-source in-video ad blocker for JioHotstar and JioCinema.</p>
       </div>
       <div class="footer-links">
-        <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker/issues" target="_blank" rel="noopener">Issue Tracker</a>
-        <a href="https://www.hotstar.com" target="_blank" rel="noopener">Hotstar</a>
-        <a href="https://www.primevideo.com" target="_blank" rel="noopener">Prime Video</a>
+        <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker" target="_blank">GitHub Repository</a>
+        <a href="https://github.com/mihirverma7781/jio-hotstar-ad-blocker/issues" target="_blank">Report Issue</a>
+        <a href="https://www.hotstar.com" target="_blank">Hotstar</a>
       </div>
+    </div>
+    <div class="footer-bottom text-center">
+      <p>Released under the MIT License. Created for smooth, high-quality streaming.</p>
     </div>
   </footer>
 

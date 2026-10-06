@@ -41,7 +41,7 @@ function initPopup() {
   const toggleEnabled = document.getElementById('toggleEnabled');
   const adsSkippedCount = document.getElementById('adsSkippedCount');
   const timeSavedCount = document.getElementById('timeSavedCount');
-  const speedButtons = document.querySelectorAll('.segment-btn, .speed-btn');
+  const speedButtons = document.querySelectorAll('.speed-btn');
 
   const toggleAutoMute = document.getElementById('toggleAutoMute');
   const toggleAutoSkipButtons = document.getElementById('toggleAutoSkipButtons');
@@ -65,18 +65,14 @@ function initPopup() {
     if (toggleEnabled) toggleEnabled.checked = isEnabled;
 
     if (statusBadge) {
-      statusBadge.textContent = isEnabled ? 'ENGAGED' : 'STANDBY';
-      const container = statusBadge.closest('.status-indicator');
-      if (container) {
-        if (isEnabled) container.classList.remove('paused');
-        else container.classList.add('paused');
-      }
+      statusBadge.textContent = isEnabled ? 'Active' : 'Paused';
+      statusBadge.className = isEnabled ? 'status-badge active' : 'status-badge paused';
     }
 
     if (masterStatusText) {
       masterStatusText.textContent = isEnabled
-        ? '16x Fast-Forward & Audio Mute'
-        : 'Engine currently on standby';
+        ? 'Accelerating & skipping in-video ads'
+        : 'Skipper is currently disabled';
     }
 
     // Statistics
